@@ -4,6 +4,7 @@ This repository present the workflow for survey data analysis of the DOMINOS pro
 ## Folder structure
 The folder is organized as follows:
 
+```bash
 ├── README.md
 ├── resources
 │   └── inhouse
@@ -15,6 +16,8 @@ The folder is organized as follows:
     ├── rules
     ├── sandbox
     └── scripts
+```
+
 
 README.md provides information on the repository structuration and explains the data analysis workflow.
  
