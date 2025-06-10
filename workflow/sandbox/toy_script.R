@@ -21,3 +21,5 @@ likert <- data %>%
     pattern = "Tout à fait d'accord",
     replacement = "Strongly agree"
   ))
+
+head(likert)
