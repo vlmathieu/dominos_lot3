@@ -22,4 +22,4 @@ likert <- data %>%
     replacement = "Strongly agree"
   ))
 
-head(likert)
+table(colnames(likert))
