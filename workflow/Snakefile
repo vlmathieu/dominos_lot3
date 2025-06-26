@@ -2,3 +2,15 @@ from snakemake.utils import min_version
 
 # set minimum snakemake version
 min_version('8.16.0')
+
+# parameters from the config file
+# configfile: 
+#     'config/config.yaml'
+
+# load rules
+include: 'rules/corr_code_quest.smk'
+
+# target rule
+rule all:
+    input:
+        'results/output/code_quest.csv'
