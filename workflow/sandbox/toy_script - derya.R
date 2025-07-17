@@ -10,16 +10,16 @@ library("labelled")
 path <- "~/recherche/DOMINOS/dominos_github/resources/inhouse/results_survey857139_code.csv" # nolint
 data <- read.csv(file = path, header = TRUE, sep = ";", na.strings=c("","NA"))
 
-## ------------- ##
-#    clean data   #
-## ------------- ##
+## ------------------------------------------------------------------------- ##
+#                                clean data                                   #
+## ------------------------------------------------------------------------- ##
 
 data_complete <- data[!is.na(data$submitdate), ] #regarder un peu plus ou est ce qu'ils se sont arrétés
-data_complete <- data_complete[data_complete$SocioGenre!="Autre", ] #regarder un peu plus ou est ce qu'ils se sont arrétés
+data_complete <- data_complete[data_complete$SocioGenre!="Autre", ] #concerne seulement 3 répondants
 
 ### recodage variables socioeconomiques ###
 
-### CSP
+## CSP
 
 # print réponses:
 ocsp<-unique(data_complete$SocioCSP.other.)
@@ -65,8 +65,8 @@ data_complete <- data_complete %>% #lavaan ne supporte pas les variable catégor
   )
 
 
-### Autres (pertinentes pour notre analyse)
-#age
+## Age
+
 data_complete$SocioAge <- factor(data_complete$SocioAge, 
                                levels = c("18 à 24 ans" ,"25 à 34 ans" ,"35 à 49 ans" , "50 à 64 ans",  "65 ans et plus" ),
                                ordered = TRUE)
@@ -74,10 +74,10 @@ data_complete$SocioAge <- factor(data_complete$SocioAge,
 data_complete <- data_complete %>%
   filter(SocioGenre != "Je préfère ne pas répondre")
 
-#genre
+## Genre
 data_complete$SocioGenre <-as.factor(data_complete$SocioGenre)
 
-#education
+## Education
 data_complete$SocioEduc <- factor(data_complete$SocioEduc, 
                                   levels = c("Aucun diplôme, certificat d’études primaires","Brevet de collèges (BEPC)",
                                              "CAP, BEP ou équivalent" ,"Baccalauréat, brevet professionnel ou équivalent" ,
@@ -85,7 +85,7 @@ data_complete$SocioEduc <- factor(data_complete$SocioEduc,
                                   ordered = TRUE)
 levels(data_complete$SocioEduc)
 
-#type de commune
+## Type de commune
 data_complete$SocioCom <- as.factor(data_complete$SocioCom)
 
 data_complete <- data_complete %>% #lavaan ne supporte pas les variable catégorielles non ordonnées comme variables exogene, il faut créer des dummies
@@ -97,21 +97,20 @@ data_complete <- data_complete %>% #lavaan ne supporte pas les variable catégor
   )
 
 
-#nombre de pers. dans le ménage
+## Nombre de personne dans le ménage 
 data_complete$SocioMenage <- as.numeric(as.character(data_complete$SocioMenage ))
 
-#revenu
-data_complete$SocioRevenu<-ifelse(is.na(data_complete$SocioRevenu), "Non déclaré", data_complete$SocioRevenu)
+## Revenu
 data_complete$SocioRevenu <-factor(data_complete$SocioRevenu, 
-       levels = c( "Non déclaré","Moins de 1500 €" ,"Entre 1500 et 2000 € inclus","Entre 2001 et 2500 € inclus",
+       levels = c("Moins de 1500 €" ,"Entre 1500 et 2000 € inclus","Entre 2001 et 2500 € inclus",
                   "Entre 2501 et 3000 € inclus" ,"Entre 3001 et 3500 € inclus" ,
-                  "Entre 3501 et 4000 € inclus", "Entre 4001 et 4500 € inclus","Entre 5001 et 5500 € inclus",
-                  "Entre 5501 et 6000 € inclus","Supérieur à 6000 €"),
+                  "Entre 3501 et 4000 € inclus", "Entre 4001 et 4500 € inclus","Entre 4501 € et 5000 € inclus",
+                  "Entre 5001 et 5500 € inclus","Entre 5501 et 6000 € inclus","Supérieur à 6000 €"),
        ordered = TRUE)
-any(is.na(data_complete$SocioRevenu))
 
 
-## knowledge variables: ConSurface
+###  knowledge variables ###
+
 data_complete$ConEssence_num<-ifelse(data_complete$ConEssence=="Feuillus",1,0)
 data_complete$ConSurface_num<-ifelse(data_complete$ConSurface=="Un tiers",1,0)
 data_complete$ConSurface2_num<-ifelse(data_complete$ConSurface2=="A fortement progressé",1,0)
@@ -119,24 +118,78 @@ data_complete$ConGestion_num<-ifelse(data_complete$ConGestion=="Vrai",1,0)
 data_complete$ConProp_num<-ifelse(data_complete$ConProp=="À des individus privés",1,0)
 data_complete$ConRecolte_num<-ifelse(data_complete$ConRecolte=="Moins de bois que ce que la forêt produit",1,0)
 data_complete$Con_num<-rowSums(data_complete[,c('ConEssence_num','ConSurface_num','ConSurface2_num',"ConGestion_num","ConProp_num","ConRecolte_num")], na.rm = TRUE)
-table(data_complete$Con_num, data_complete$ConEval)
 
-## threat variables: 
+data_complete$ConEval <-factor(data_complete$ConEval, 
+                                   levels = c( "Très Faibles" ,"Faibles","Moyennes","Bonnes","Très bonnes"),
+                                   ordered = TRUE)
 
-#codage facteur des échelles de likert
-likert <- data %>%
-  select(contains("ATTENV")) %>%
-  select(contains("P")) %>%
-  mutate(across(
-    everything(),
-    gsub,
-    pattern = "Tout à fait d'accord",
-    replacement = "Strongly agree"
+
+#table(data_complete$Con_num, data_complete$ConEval_num)
+
+### perception of threat variables ###
+
+## tout recoder likert de 1 à 5 (1: je ne ressens pas de menace, 5: je ressens une menace), recoder les "neg" après 
+
+data_complete <- data_complete %>%
+  mutate(across(starts_with("ATTMENACE"),
+                ~ recode(.,
+                         "Pas du tout d'accord" = 1,
+                         "Plutôt pas d'accord" = 2,
+                         "Ni d'accord ni pas d'accord" = 3,
+                         "Plutôt d'accord" = 4,
+                         "Tout à fait d'accord" = 5)
   ))
 
+# pour "SantePos": je pense que les forêts française sont en bonne santé.
+# la reverse est en faite: "CCNegR" je ne pense pas que les forêts françaises soient en forme.
+# si on va dans le sens, on ressent de + en + de menace de 1 à 5 SantePos est en fait la reverse de CCNegR.
+# on renomme ce couple: SanteR pour SantePos et Sante pour CCNegR.
 
-#reverse coding? -> il faut reverse coder les neg car les R vont dans le même sens que les non R
-#ou alors, ce sont les neg qui faut reverse coder
+table(data_complete$ATTMENACE.SantePos.)
+
+data_complete <- data_complete %>%
+  mutate(ATTMENACE.SantePos. = 6 - ATTMENACE.SantePos.)
+table(data_complete$ATTMENACE.SantePos.)
+
+names(data_complete)[names(data_complete)=="ATTMENACE.SantePos."]<-"ATTMENACE.SanteR." #je pense que les forêts française sont en bonne santé.
+names(data_complete)[names(data_complete)=="ATTMENACE.CCNegR."]<-"ATTMENACE.Sante." # je ne pense pas que les forêts françaises soient en forme.
+
+# pour SantePosR: je ne pense pas que le CC ait de lourde csq sur les fo : CCR. Il faut reverse celle-ci.
+# pour CCNeg: le changement climatique fait peser de graves risques... CC
+
+data_complete <- data_complete %>%
+  mutate(ATTMENACE.SantePosR. = 6 - ATTMENACE.SantePosR.)
+names(data_complete)[names(data_complete)=="ATTMENACE.SantePosR."]<-"ATTMENACE.CCR." 
+names(data_complete)[names(data_complete)=="ATTMENACE.CCNeg."]<-"ATTMENACE.CC." 
+
+# pour GestionPos; je pense que les forêts sont gérées durablement (si on garde la même logique c'est une R) -> GestionR.
+# correspond à GestionNeg : l'exploitation des forêts menace leur intégrité -> Gestion
+data_complete <- data_complete %>%
+  mutate(ATTMENACE.GestionPos. = 6 - ATTMENACE.GestionPos.)
+names(data_complete)[names(data_complete)=="ATTMENACE.GestionPos."]<-"ATTMENACE.GestionR." 
+names(data_complete)[names(data_complete)=="ATTMENACE.GestionNeg."]<-"ATTMENACE.Gestion." 
+
+# pour GestionPosR ; la déforestation n'est pas un probleme (si on garde la même logique c'est une R) -> DefoR.
+# correspond à GestionNegR : la déforestation n'épargne pas les forêt -> Defo
+data_complete <- data_complete %>%
+  mutate(ATTMENACE.GestionPosR = 6 - ATTMENACE.GestionPosR.)
+names(data_complete)[names(data_complete)=="ATTMENACE.GestionPosR."]<-"ATTMENACE.DefoR." 
+names(data_complete)[names(data_complete)=="ATTMENACE.GestionNegR."]<-"ATTMENACE.Defo." 
+
+# InqNegR: je ne pense pas que l'exploitation endommagera la planete (si on garde la meme logique, c'est un R) -> InqR
+# correspond a InqPos: je pense que l'exploitation impactera notre BE (Inq)
+data_complete <- data_complete %>%
+  mutate(ATTMENACE.InqNegR. = 6 - ATTMENACE.InqNegR.)
+names(data_complete)[names(data_complete)=="ATTMENACE.InqNegR."]<-"ATTMENACE.InqR." 
+names(data_complete)[names(data_complete)=="ATTMENACE.InqPos."]<-"ATTMENACE.Inq." 
+
+# InqNeg: je suis plutot optimiste: c'est une R -> NoptR
+# correspond à InqPosR: je ne suis pas optimiste -> Nopt
+data_complete <- data_complete %>%
+  mutate(ATTMENACE.InqNeg. = 6 - ATTMENACE.InqNeg.)
+names(data_complete)[names(data_complete)=="ATTMENACE.InqNeg."]<-"ATTMENACE.NoptR." 
+names(data_complete)[names(data_complete)=="ATTMENACE.InqPosR."]<-"ATTMENACE.Nopt." 
+
 
 ### proximity variables ###
 unique(data_complete$ProxChauf)
@@ -168,13 +221,23 @@ data_complete$ProxChaufclean<-ifelse(is.na(data_complete$ProxChaufclean), data_c
 data_complete$ProxChaufclean_code<-as.factor(data_complete$ProxChaufclean)
 levels(data_complete$ProxChaufclean_code)
 
+### environmental attitudes ###
+
+### forest attitudes ###
+
+### wood construction attitude ###
+
+### wood energy attitude ###
 
 
-### garder une version clean de la base de donnée
+### garder une version clean de la base de donnée ###
 
+
+## ------------------------------------------------------------------------- ##
+#                         test the SEM model                                  #
+## ------------------------------------------------------------------------- ##
 library(lavaan)
 
-# --- Example SEM model ---
 
 model <- '
   ##############################
