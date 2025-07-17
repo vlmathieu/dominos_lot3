@@ -53,60 +53,83 @@ levels(data_complete$SocioCSP_code)
 data_complete <- data_complete %>% #lavaan ne supporte pas les variable catégorielles non ordonnées comme variables exogene, il faut créer des dummies
   mutate(SocioCSP_code = factor(SocioCSP_code)) %>%
   mutate(
-    CSP_Employe = ifelse(SocioCSP_code == "Employé", 1, 0),
+    CSP_Inter = ifelse(SocioCSP_code == "Employé"| SocioCSP_code == "Profession intermédiaire" |SocioCSP_code == "Ouvrier" | SocioCSP_code == "Autre", 1, 0),
     CSP_Etudiant = ifelse(SocioCSP_code == "Étudiant", 1, 0),
-    CSP_Inactif = ifelse(SocioCSP_code == "Inactif", 1, 0),
-    CSP_Ouvrier = ifelse(SocioCSP_code == "Ouvrier", 1, 0),
-    CSP_ProfInter = ifelse(SocioCSP_code == "Profession intermédiaire", 1, 0),
-    CSP_ProfLibre = ifelse(SocioCSP_code == "Profession libérale / Cadre", 1, 0),
-    CSP_Retraite = ifelse(SocioCSP_code == "Retraité", 1, 0),
+    CSP_Cadre = ifelse(SocioCSP_code == "Profession libérale / Cadre", 1, 0),
+    CSP_Inactif = ifelse(SocioCSP_code == "Retraité" | SocioCSP_code == "Inactif" , 1, 0),
     CSP_Artisan = ifelse(SocioCSP_code == "Agriculteur / Artisan / Commerçant / Chefs d’entreprise", 1, 0),
-    CSP_Autre = ifelse(SocioCSP_code == "Autre", 1, 0)
   )
-
 
 ## Age
 
 data_complete$SocioAge <- factor(data_complete$SocioAge, 
-                               levels = c("18 à 24 ans" ,"25 à 34 ans" ,"35 à 49 ans" , "50 à 64 ans",  "65 ans et plus" ),
-                               ordered = TRUE)
+                               levels = c("18 à 24 ans" ,"25 à 34 ans" ,"35 à 49 ans" , "50 à 64 ans",  "65 ans et plus" ))
+table(data_complete$SocioAge)
+
+data_complete <- data_complete %>% 
+  mutate(
+    SocioAge_Jeune = ifelse(SocioAge == "18 à 24 ans"| SocioCSP_code == "25 à 34 ans", 1, 0),
+    SocioAge_Inter = ifelse(SocioAge == "35 à 49 ans", 1, 0),
+    SocioAge_Vieux = ifelse(SocioAge == "50 à 64 ans"| SocioCSP_code == "65 ans et plus", 1, 0) 
+  )
 
 data_complete <- data_complete %>%
   filter(SocioGenre != "Je préfère ne pas répondre")
 
 ## Genre
 data_complete$SocioGenre <-as.factor(data_complete$SocioGenre)
+table(data_complete$SocioGenre)
+
+data_complete$SocioGenre_Femme = ifelse(data_complete$SocioGenre == "Femme", 1, 0)
 
 ## Education
 data_complete$SocioEduc <- factor(data_complete$SocioEduc, 
                                   levels = c("Aucun diplôme, certificat d’études primaires","Brevet de collèges (BEPC)",
                                              "CAP, BEP ou équivalent" ,"Baccalauréat, brevet professionnel ou équivalent" ,
-                                             "Bac +2 à Bac +5", "Supérieur à Bac +5" ),
-                                  ordered = TRUE)
-levels(data_complete$SocioEduc)
+                                             "Bac +2 à Bac +5", "Supérieur à Bac +5" ))
+table(data_complete$SocioEduc)
+
+data_complete <- data_complete %>% 
+  mutate(
+    SocioEduc_inf = ifelse(SocioEduc == "Aucun diplôme, certificat d’études primaires"| SocioCSP_code == "Brevet de collèges (BEPC)", 1, 0),
+    SocioEduc_moyen = ifelse(SocioEduc == "CAP, BEP ou équivalent"| SocioCSP_code == "Baccalauréat, brevet professionnel ou équivalent", 1, 0),
+    SocioEduc_sup = ifelse(SocioEduc ==  "Bac +2 à Bac +5"| SocioCSP_code == "Supérieur à Bac +5", 1, 0),
+  )
 
 ## Type de commune
 data_complete$SocioCom <- as.factor(data_complete$SocioCom)
 
-data_complete <- data_complete %>% #lavaan ne supporte pas les variable catégorielles non ordonnées comme variables exogene, il faut créer des dummies
-  mutate(SocioCom = factor(SocioCom)) %>%
+data_complete <- data_complete %>% 
   mutate(
-    Ville_Rural = ifelse(SocioCom == "Une commune rurale", 1, 0),
-    Ville_Moyenne = ifelse(SocioCom ==  "Une ville de 20 000 à 99 999 habitants" | SocioCom =="Une ville de 2000 à 19 999 habitants", 1, 0),
-    Ville_Grande = ifelse(SocioCom == "Une ville de plus de 100 000 habitants", 1, 0),
+    SocioCom_Rural = ifelse(SocioCom == "Une commune rurale", 1, 0),
+    SocioCom_Moyenne = ifelse(SocioCom ==  "Une ville de 20 000 à 99 999 habitants" | SocioCom =="Une ville de 2000 à 19 999 habitants", 1, 0),
+    SocioCom_Grande = ifelse(SocioCom == "Une ville de plus de 100 000 habitants", 1, 0),
   )
 
 
 ## Nombre de personne dans le ménage 
 data_complete$SocioMenage <- as.numeric(as.character(data_complete$SocioMenage ))
 
-## Revenu
+## Revenu #transformer en variable numérique
 data_complete$SocioRevenu <-factor(data_complete$SocioRevenu, 
        levels = c("Moins de 1500 €" ,"Entre 1500 et 2000 € inclus","Entre 2001 et 2500 € inclus",
                   "Entre 2501 et 3000 € inclus" ,"Entre 3001 et 3500 € inclus" ,
                   "Entre 3501 et 4000 € inclus", "Entre 4001 et 4500 € inclus","Entre 4501 € et 5000 € inclus",
-                  "Entre 5001 et 5500 € inclus","Entre 5501 et 6000 € inclus","Supérieur à 6000 €"),
-       ordered = TRUE)
+                  "Entre 5001 et 5500 € inclus","Entre 5501 et 6000 € inclus","Supérieur à 6000 €"))
+
+data_complete$SocioRevenu_num <- recode(data_complete$SocioRevenu,
+                                        "Moins de 1500 €" = 1250,
+                                        "Entre 1500 et 2000 € inclus" = 1750,
+                                        "Entre 2001 et 2500 € inclus" = 2250,
+                                        "Entre 2501 et 3000 € inclus" = 2750,
+                                        "Entre 3001 et 3500 € inclus" = 3250,
+                                        "Entre 3501 et 4000 € inclus" = 3750,
+                                        "Entre 4001 et 4500 € inclus" = 4250,
+                                        "Entre 4501 € et 5000 € inclus" = 4750,
+                                        "Entre 5001 et 5500 € inclus" = 5250,
+                                        "Entre 5501 et 6000 € inclus" = 5750,
+                                        "Supérieur à 6000 €" = 6500
+)
 
 
 ###  knowledge variables ###
@@ -120,8 +143,14 @@ data_complete$ConRecolte_num<-ifelse(data_complete$ConRecolte=="Moins de bois qu
 data_complete$Con_num<-rowSums(data_complete[,c('ConEssence_num','ConSurface_num','ConSurface2_num',"ConGestion_num","ConProp_num","ConRecolte_num")], na.rm = TRUE)
 
 data_complete$ConEval <-factor(data_complete$ConEval, 
-                                   levels = c( "Très Faibles" ,"Faibles","Moyennes","Bonnes","Très bonnes"),
-                                   ordered = TRUE)
+                                   levels = c( "Très Faibles" ,"Faibles","Moyennes","Bonnes","Très bonnes"))
+
+data_complete$ConEval_num <- recode(data_complete$ConEval,
+                                        "Très Faibles" = 1,
+                                        "Faibles" = 2,
+                                        "Moyennes" = 3,
+                                        "Bonnes" = 4,
+                                        "Très bonnes" = 5)
 
 
 #table(data_complete$Con_num, data_complete$ConEval_num)
@@ -132,14 +161,14 @@ data_complete$ConEval <-factor(data_complete$ConEval,
 
 data_complete <- data_complete %>%
   mutate(across(starts_with("ATTMENACE"),
-                ~ recode(.,
-                         "Pas du tout d'accord" = 1,
-                         "Plutôt pas d'accord" = 2,
-                         "Ni d'accord ni pas d'accord" = 3,
-                         "Plutôt d'accord" = 4,
-                         "Tout à fait d'accord" = 5)
+                ~ factor(recode(.,
+                                "Pas du tout d'accord" = 1,
+                                "Plutôt pas d'accord" = 2,
+                                "Ni d'accord ni pas d'accord" = 3,
+                                "Plutôt d'accord" = 4,
+                                "Tout à fait d'accord" = 5),
+                         ordered = TRUE,levels = 1:5)
   ))
-
 # pour "SantePos": je pense que les forêts française sont en bonne santé.
 # la reverse est en faite: "CCNegR" je ne pense pas que les forêts françaises soient en forme.
 # si on va dans le sens, on ressent de + en + de menace de 1 à 5 SantePos est en fait la reverse de CCNegR.
@@ -172,9 +201,9 @@ names(data_complete)[names(data_complete)=="ATTMENACE.GestionNeg."]<-"ATTMENACE.
 # pour GestionPosR ; la déforestation n'est pas un probleme (si on garde la même logique c'est une R) -> DefoR.
 # correspond à GestionNegR : la déforestation n'épargne pas les forêt -> Defo
 data_complete <- data_complete %>%
-  mutate(ATTMENACE.GestionPosR = 6 - ATTMENACE.GestionPosR.)
+  mutate(ATTMENACE.GestionPosR. = 6 - ATTMENACE.GestionPosR.)
 names(data_complete)[names(data_complete)=="ATTMENACE.GestionPosR."]<-"ATTMENACE.DefoR." 
-names(data_complete)[names(data_complete)=="ATTMENACE.GestionNegR."]<-"ATTMENACE.Defo." 
+names(data_complete)[names(data_complete)=="ATTMENACE.GestioNegR."]<-"ATTMENACE.Defo." 
 
 # InqNegR: je ne pense pas que l'exploitation endommagera la planete (si on garde la meme logique, c'est un R) -> InqR
 # correspond a InqPos: je pense que l'exploitation impactera notre BE (Inq)
@@ -260,6 +289,8 @@ data_complete <- data_complete %>%
     ProxChauf2_bois = ifelse(ProxChauf2clean == "Bois", 1, 0)
   )
 
+data_complete$ProxChauf_bois1<-ifelse(data_complete$ProxChauf2_bois==1 | data_complete$ProxChauf_bois==1, 1, 0)
+
 # propriété
 
 table(data_complete$ProxProp)
@@ -279,7 +310,6 @@ data_complete$ProxTravail <- ifelse(data_complete$ProxTravail == "Oui", 1, 0)
 
 # Info #un peu redondant par rapport à la question de connaissance, je propose de l'enlever. Idem pour infoou
 table(data_complete$ProxInfo)
-data_complete$ProxTravail <- ifelse(data_complete$ProxTravail == "Oui", 1, 0)
 
 # logement
 table(data_complete$ProxLog)
@@ -287,43 +317,116 @@ table(data_complete$ProxLog)
 data_complete <- data_complete %>% 
   mutate(ProxLog = factor(ProxLog)) %>%
   mutate(
-    ProxLog_FullBois = ifelse(ProxLog == "Oui, entièrement (ex. ossature bois)", 1, 0),
-    ProxLog_Bois = ifelse(ProxLog == "Oui, partiellement (ex. charpente seulement)", 1, 0),
+    ProxLog_Bois = ifelse(ProxLog == "Oui, entièrement (ex. ossature bois)" | ProxLog == "Oui, partiellement (ex. charpente seulement)", 1, 0),
     ProxLog_Autre = ifelse(ProxLog == "Non", 1, 0) )
 
-# PNR ou Parc
+# PNR 
 
-table()
+table(data_complete$ProxPnr)
+data_complete$ProxPnr <- ifelse(data_complete$ProxPnr == "Oui", 1, 0)
+
+
+# Promenade en forêt
+table(data_complete$ProxProm)
+data_complete$ProxProm <-factor(data_complete$ProxProm, 
+                               levels = c("Jamais","Moins d’une fois par mois","Au moins une fois par mois","Au moins une fois par semaine","Tous les jours"))
+
+data_complete <- data_complete %>% 
+  mutate(
+    ProxProm_Jamais = ifelse(ProxProm == "Jamais", 1, 0),
+    ProxProm_Peu = ifelse(ProxProm == "Moins d’une fois par mois" | ProxProm=="Au moins une fois par mois", 1, 0),
+    ProxProm_Souvent = ifelse(ProxProm == "Au moins une fois par semaine"| ProxProm=="Tous les jours", 1, 0) )
 
 ### environmental attitudes ###
+data_complete <- data_complete %>%
+  mutate(across(starts_with("ATTENV"),
+                ~ factor(recode(.,
+                                "Pas du tout d'accord" = 1,
+                                "Plutôt pas d'accord" = 2,
+                                "Ni d'accord ni pas d'accord" = 3,
+                                "Plutôt d'accord" = 4,
+                                "Tout à fait d'accord" = 5),
+                         ordered = TRUE,levels = 1:5)
+  ))
+
+data_complete <- data_complete %>%
+  mutate(across(starts_with("ATTENV") & ends_with("R."),
+    ~ 6 - .
+  ))
+
 
 ### forest attitudes ###
+data_complete <- data_complete %>%
+  mutate(across(starts_with("ATTFO"),
+                ~ factor(recode(.,
+                                "Pas du tout d'accord" = 1,
+                                "Plutôt pas d'accord" = 2,
+                                "Ni d'accord ni pas d'accord" = 3,
+                                "Plutôt d'accord" = 4,
+                                "Tout à fait d'accord" = 5),
+                         ordered = TRUE,levels = 1:5)
+  ))
 
+
+data_complete <- data_complete %>%
+  mutate(across(starts_with("ATTFO") & ends_with("R."),
+                ~ 6 - .
+  ))
 ### wood construction attitude ###
+data_complete <- data_complete %>%
+  mutate(across(starts_with("ATTBC"),
+                ~ factor(recode(.,
+                                "Pas du tout d'accord" = 1,
+                                "Plutôt pas d'accord" = 2,
+                                "Ni d'accord ni pas d'accord" = 3,
+                                "Plutôt d'accord" = 4,
+                                "Tout à fait d'accord" = 5),
+                         ordered = TRUE,levels = 1:5)
+  ))
 
+data_complete <- data_complete %>%
+  mutate(across(starts_with("ATTBC") & ends_with("R."),
+                ~ 6 - .
+  ))
 ### wood energy attitude ###
+data_complete <- data_complete %>%
+  mutate(across(starts_with("ATTBE"),
+    ~ factor(recode(.,
+             "Pas du tout d'accord" = 1,
+             "Plutôt pas d'accord" = 2,
+             "Ni d'accord ni pas d'accord" = 3,
+             "Plutôt d'accord" = 4,
+             "Tout à fait d'accord" = 5),
+      ordered = TRUE,levels = 1:5)
+    ))
 
+data_complete <- data_complete %>%
+  mutate(across(starts_with("ATTBE") & ends_with("R."),
+                ~ 6 - .
+  ))
 
-### garder une version clean de la base de donnée ###
+### vérifier les colinéarités ###
 
+data_new<-data_complete[,c("ATTMENACE.Sante.","ATTMENACE.SanteR.","ATTMENACE.CC.","ATTMENACE.CCR.","ATTMENACE.Gestion.","ATTMENACE.GestionR.","ATTMENACE.Defo.","ATTMENACE.DefoR.","ATTMENACE.InqR.","ATTMENACE.Inq.","ATTMENACE.Nopt.", "ATTMENACE.NoptR.")]
+
+cor(data_new)
 
 ## ------------------------------------------------------------------------- ##
 #                         test the SEM model                                  #
 ## ------------------------------------------------------------------------- ##
 library(lavaan)
-
+ordered_vars <- grep("^ATT", names(data_complete), value = TRUE)
 
 model <- '
   ##############################
   # 1) MEASUREMENT MODEL
   ##############################
 
-  # Exogenous latent: Proximity
   # First-order factors
-  Proximity =~ ProxProp + ProxRes + ProxTravail + ProxInfo+ ProxChauf + ProxLog +ProxChauf2 + ProxPnr + ProxProm + ProxParc
-  Threat =~ ATTMENACE.SantePos. + ATTMENACE.SantePosR. + ATTMENACE.CCNeg. + ATTMENACE.CCNegR. + ATTMENACE.GestionPos. + ATTMENACE.GestionPosR. +  ATTMENACE.GestioNegR. + ATTMENACE.GestionNeg. + ATTMENACE.InqNegR. + ATTMENACE.InqNeg. + ATTMENACE.InqPosR.+ATTMENACE.InqPos.
-  Knowledge =~ ConSurface + ConSurface2 + ConGestion  + ConEssence +ConRecolte +ConEval
-  Env_Preserv =~ ATTENV.P1R. + ATTENV.P2. + ATTENV.P2R. + ATTENV.P6R. + ATTENV.P8R. +ATTENV.P8. +ATTENV.P12.+ATTENV.P12R.
+  Proximity =~ ProxChauf_bois + ProxTravail   + ProxLog_Bois  + ProxPnr  + ProxProm_Souvent 
+  Threat =~ ATTMENACE.Sante. + ATTMENACE.SanteR. + ATTMENACE.CC. + ATTMENACE.CCR. + ATTMENACE.Gestion. + ATTMENACE.GestionR. + ATTMENACE.Defo. + ATTMENACE.DefoR. + ATTMENACE.InqR. + ATTMENACE.Inq. 
+  Knowledge =~ ConEssence + ConSurface + ConSurface2 + ConGestion + ConRecolte + ConEval_num + ConProp 
+  Env_Preserv =~ ATTENV.P1R. +ATTENV.P1. + ATTENV.P2. + ATTENV.P2R. + ATTENV.P6R. + ATTENV.P6. + ATTENV.P8R. +ATTENV.P8. +ATTENV.P12.+ATTENV.P12R.
   Env_Util =~ ATTENV.U4. +ATTENV.U4R. + ATTENV.U5R. + ATTENV.U5. + ATTENV.U7R. + ATTENV.U7. + ATTENV.U9. + ATTENV.U9R. + ATTENV.U10.+ ATTENV.U10R.
   Fo_Preserv =~ ATTFO.P1.+ATTFO.P1R.+ATTFO.P2.+ATTFO.P2R.+ATTFO.P3.+ATTFO.P3R.+ATTFO.P6.+ATTFO.P6R.+ATTFO.P8.+ATTFO.P8R.
   Fo_Util =~ ATTFO.U4. + ATTFO.U4R. + ATTFO.U5R. + ATTFO.U5. + ATTFO.U7R. + ATTFO.U7. + ATTFO.U9. + ATTFO.U9R. + ATTFO.U10R. + ATTFO.U10.
@@ -346,12 +449,12 @@ model <- '
   ##############################
   
   # Socioeconomic observed predictors
-  Threat ~ SocioAge + SocioGenre + Ville_Moyenne + Ville_Grande + Ville_Rural +CSP_Employe + CSP_Etudiant+CSP_Ouvrier+CSP_Inactif+CSP_ProfInter+CSP_ProfLibre +CSP_Retraite+CSP_Artisan+CSP_Autre + SocioRegion  + SocioEduc + SocioMenage + SocioRevenu + Proximity
-  Knowledge ~ SocioAge + SocioGenre + Ville_Moyenne + Ville_Grande + Ville_Rural +CSP_Employe + CSP_Etudiant+CSP_Ouvrier+CSP_Inactif+CSP_ProfInter+CSP_ProfLibre +CSP_Retraite+CSP_Artisan+CSP_Autre + SocioRegion  + SocioEduc + SocioMenage + SocioRevenu + Proximity
-  AttEnv ~ Threat + Knowledge +  SocioAge + SocioGenre + Ville_Moyenne + Ville_Grande + Ville_Rural + CSP_Employe + CSP_Etudiant+CSP_Ouvrier+CSP_Inactif+CSP_ProfInter+CSP_ProfLibre +CSP_Retraite+CSP_Artisan+CSP_Autre + SocioRegion  + SocioEduc + SocioMenage + SocioRevenu + Proximity
-  AttFo ~ Threat + Knowledge +  SocioAge + SocioGenre + Ville_Moyenne + Ville_Grande + Ville_Rural +CSP_Employe + CSP_Etudiant+CSP_Ouvrier+CSP_Inactif+CSP_ProfInter+CSP_ProfLibre +CSP_Retraite+CSP_Artisan+CSP_Autre + SocioRegion  + SocioEduc + SocioMenage + SocioRevenu + Proximity
-  AttCW ~ Threat + Knowledge +  SocioAge + SocioGenre + Ville_Moyenne + Ville_Grande + Ville_Rural +CSP_Employe + CSP_Etudiant+CSP_Ouvrier+CSP_Inactif+CSP_ProfInter+CSP_ProfLibre +CSP_Retraite+CSP_Artisan+CSP_Autre + SocioRegion  + SocioEduc + SocioMenage + SocioRevenu + Proximity
-  AttEW ~ Threat + Knowledge +  SocioAge + SocioGenre + Ville_Moyenne + Ville_Grande + Ville_Rural +CSP_Employe + CSP_Etudiant+CSP_Ouvrier+CSP_Inactif+CSP_ProfInter+CSP_ProfLibre +CSP_Retraite+CSP_Artisan+CSP_Autre + SocioRegion  + SocioEduc + SocioMenage + SocioRevenu + Proximity
+  Threat ~ SocioAge_Jeune + SocioAge_Vieux + SocioGenre_Femme   +   SocioCom_Grande+ SocioCom_Rural    + SocioEduc_sup + SocioEduc_inf  + SocioRevenu_num  + Proximity
+  Knowledge ~ SocioAge_Jeune + SocioAge_Vieux + SocioGenre_Femme   + SocioCom_Rural   + SocioEduc_sup + SocioEduc_inf  + SocioRevenu_num  + Proximity
+  AttEnv ~ Threat + Knowledge + SocioAge_Jeune + SocioAge_Vieux + SocioGenre_Femme  + SocioCom_Grande + SocioCom_Rural    + SocioEduc_sup + SocioEduc_inf  + SocioRevenu_num + Proximity
+  AttFo ~ Threat + Knowledge +  SocioAge_Jeune + SocioAge_Vieux + SocioGenre_Femme  + SocioCom_Grande + SocioCom_Rural    + SocioEduc_sup + SocioEduc_inf  + SocioRevenu_num  + Proximity
+  AttCW ~ Threat + Knowledge + SocioAge_Jeune + SocioAge_Vieux + SocioGenre_Femme  + SocioCom_Grande + SocioCom_Rural    + SocioEduc_sup + SocioEduc_inf + SocioRevenu_num + Proximity
+  AttEW ~ Threat + Knowledge   + SocioAge_Jeune + SocioAge_Vieux + SocioGenre_Femme  + SocioCom_Grande + SocioCom_Rural  + SocioEduc_sup + SocioEduc_inf  + SocioRevenu_num  + Proximity
 
   ##############################
   # (Optional) Covariances
@@ -359,7 +462,7 @@ model <- '
 
 '
 # --- Fit the model ---
-fit <- sem(model, data = data_complete, missing = "fiml")
+fit <- sem(model, data = data_complete, ordered = ordered_vars)
 # --- Get summary with fit indices ---
 summary(fit, fit.measures = TRUE, standardized = TRUE)
 
