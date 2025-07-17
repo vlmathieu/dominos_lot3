@@ -192,9 +192,10 @@ names(data_complete)[names(data_complete)=="ATTMENACE.InqPosR."]<-"ATTMENACE.Nop
 
 
 ### proximity variables ###
+
+# moyen de chauffage principal
 unique(data_complete$ProxChauf)
 unique(data_complete$ProxChauf.other.)
-
 
 data_complete <- data_complete %>%
   mutate(
@@ -216,10 +217,83 @@ test<-data_complete[,c("ProxChauf","ProxChauf.other.","ProxChaufclean")]
 data_complete$ProxChaufclean = ifelse(data_complete$ProxChauf.other. == "Chauffage collectif incinérateur d'ordures ", "Autre",data_complete$ProxChaufclean)
 data_complete$ProxChaufclean = ifelse(data_complete$ProxChauf.other. == "Usine d'incinération des ordures menageres", "Autre",data_complete$ProxChaufclean)
 data_complete$ProxChaufclean = ifelse(data_complete$ProxChauf.other. == "Roulage de déchets municipaux", "Autre",data_complete$ProxChaufclean)
-
 data_complete$ProxChaufclean<-ifelse(is.na(data_complete$ProxChaufclean), data_complete$ProxChauf, data_complete$ProxChaufclean)
-data_complete$ProxChaufclean_code<-as.factor(data_complete$ProxChaufclean)
-levels(data_complete$ProxChaufclean_code)
+data_complete$ProxChaufclean<-as.factor(data_complete$ProxChaufclean)
+
+table(data_complete$ProxChaufclean)
+
+data_complete <- data_complete %>% #lavaan ne supporte pas les variable catégorielles non ordonnées comme variables exogene, il faut créer des dummies
+  mutate(ProxChaufclean = factor(ProxChaufclean)) %>%
+  mutate(
+    ProxChauf_bois = ifelse(ProxChaufclean == "Bois", 1, 0),
+    ProxChauf_nonfossil = ifelse(ProxChaufclean ==  "Électricité" | ProxChaufclean =="Géothermie" | ProxChaufclean =="Pompe à chaleur" , 1, 0),
+    ProxChauf_fossil = ifelse(ProxChaufclean == "Fioul" | ProxChaufclean == "Gaz", 1, 0),
+    ProxChauf_autre = ifelse(ProxChaufclean == "Autre" | ProxChaufclean == "Je ne sais pas", 1, 0),
+  )
+
+# moyen de chauffage secondaire
+
+unique(data_complete$ProxChauf2)
+unique(data_complete$ProxChauf2.other.)
+
+data_complete <- data_complete %>%
+  mutate(
+    ProxChauf2clean = case_when(
+      is.na(ProxChauf2.other.) ~ NA_character_,
+      str_detect(tolower(ProxChauf2.other.), "pelle|granul[ée]|bois|pelet|pelket|pel[ée]|chauffage au pellet|biomasse|granuy|chemin[ée]e") ~ "Bois",
+      str_detect(tolower(ProxChauf2.other.), "[ée]lec|clim|solaire|solaire") ~ "Électricité",
+      str_detect(tolower(ProxChauf2.other.), "gaz") ~ "Gaz",
+      str_detect(tolower(ProxChauf2.other.), "p[ée]trole|fioul") ~ "Fioul",
+      str_detect(tolower(ProxChauf2.other.), "géothermie") ~ "Géothermie",
+      str_detect(tolower(ProxChauf2.other.), "cpcu|collectif|colllectif|colectif|urbain|central|réseau|chaleur|'|un|télé|plaid|bougie|ne chauffe pas|aucun chauffage|je n’utilise pas de chauffage|eau|radiateur") ~ "Je ne sais pas",
+      str_detect(tolower(ProxChauf2.other.), "ordure|ordures|d[ée]chet|thanol|usb|graminé|bouillote|tien|baie vitrée") ~ "Autre",
+      str_detect(tolower(ProxChauf2.other.), "pompe") ~ "pompe a chaleur",
+      TRUE ~ "Autre"
+    )
+  )
+
+test<-data_complete[,c("ProxChauf2","ProxChauf2clean","ProxChauf2.other.")]
+
+data_complete <- data_complete %>% 
+  mutate(ProxChauf2clean = factor(ProxChauf2clean)) %>%
+  mutate(
+    ProxChauf2_bois = ifelse(ProxChauf2clean == "Bois", 1, 0)
+  )
+
+# propriété
+
+table(data_complete$ProxProp)
+data_complete$ProxProp <- ifelse(data_complete$ProxProp == "Oui", 1, 0)
+
+# réseau
+table(data_complete$ProxRes)
+data_complete$ProxRes <- ifelse(data_complete$ProxRes == "Oui", 1, 0)
+
+# réseau2
+table(data_complete$ProxRes2)
+data_complete$ProxRes2 <- ifelse(data_complete$ProxRes2 == "Oui", 1, 0)
+
+# travail
+table(data_complete$ProxTravail)
+data_complete$ProxTravail <- ifelse(data_complete$ProxTravail == "Oui", 1, 0)
+
+# Info #un peu redondant par rapport à la question de connaissance, je propose de l'enlever. Idem pour infoou
+table(data_complete$ProxInfo)
+data_complete$ProxTravail <- ifelse(data_complete$ProxTravail == "Oui", 1, 0)
+
+# logement
+table(data_complete$ProxLog)
+
+data_complete <- data_complete %>% 
+  mutate(ProxLog = factor(ProxLog)) %>%
+  mutate(
+    ProxLog_FullBois = ifelse(ProxLog == "Oui, entièrement (ex. ossature bois)", 1, 0),
+    ProxLog_Bois = ifelse(ProxLog == "Oui, partiellement (ex. charpente seulement)", 1, 0),
+    ProxLog_Autre = ifelse(ProxLog == "Non", 1, 0) )
+
+# PNR ou Parc
+
+table()
 
 ### environmental attitudes ###
 
