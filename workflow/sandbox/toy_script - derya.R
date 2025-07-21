@@ -59,6 +59,7 @@ data_complete <- data_complete %>% #lavaan ne supporte pas les variable catégor
     CSP_Inactif = ifelse(SocioCSP_code == "Retraité" | SocioCSP_code == "Inactif" , 1, 0),
     CSP_Artisan = ifelse(SocioCSP_code == "Agriculteur / Artisan / Commerçant / Chefs d’entreprise", 1, 0),
   )
+table(data_complete$CSP_Artisan, useNA = "always")
 
 ## Age
 
@@ -75,12 +76,14 @@ data_complete <- data_complete %>%
 
 data_complete <- data_complete %>%
   filter(SocioGenre != "Je préfère ne pas répondre")
+table(data_complete$SocioAge_Vieux, useNA = "always")
 
 ## Genre
 data_complete$SocioGenre <-as.factor(data_complete$SocioGenre)
 table(data_complete$SocioGenre)
 
 data_complete$SocioGenre_Femme = ifelse(data_complete$SocioGenre == "Femme", 1, 0)
+table(data_complete$SocioGenre_Femme, useNA = "always")
 
 ## Education
 data_complete$SocioEduc <- factor(data_complete$SocioEduc, 
@@ -106,6 +109,7 @@ data_complete <- data_complete %>%
     SocioCom_Grande = ifelse(SocioCom == "Une ville de plus de 100 000 habitants", 1, 0),
   )
 
+table(data_complete$SocioCom_Rural, useNA = "always")
 
 ## Nombre de personne dans le ménage 
 data_complete$SocioMenage <- as.numeric(as.character(data_complete$SocioMenage ))
@@ -131,7 +135,8 @@ data_complete$SocioRevenu_num <- recode(data_complete$SocioRevenu,
                                         "Supérieur à 6000 €" = 6500
 )
 
-
+table(data_complete$SocioRevenu_num, useNA = "always")
+str(data_complete$SocioRevenu_num)
 ###  knowledge variables ###
 
 data_complete$ConEssence_num<-ifelse(data_complete$ConEssence=="Feuillus",1,0)
@@ -142,18 +147,15 @@ data_complete$ConProp_num<-ifelse(data_complete$ConProp=="À des individus priv�
 data_complete$ConRecolte_num<-ifelse(data_complete$ConRecolte=="Moins de bois que ce que la forêt produit",1,0)
 data_complete$Con_num<-rowSums(data_complete[,c('ConEssence_num','ConSurface_num','ConSurface2_num',"ConGestion_num","ConProp_num","ConRecolte_num")], na.rm = TRUE)
 
-data_complete$ConEval <-factor(data_complete$ConEval, 
-                                   levels = c( "Très Faibles" ,"Faibles","Moyennes","Bonnes","Très bonnes"))
-
 data_complete$ConEval_num <- recode(data_complete$ConEval,
-                                        "Très Faibles" = 1,
+                                        "Très faibles" = 1,
                                         "Faibles" = 2,
                                         "Moyennes" = 3,
                                         "Bonnes" = 4,
                                         "Très bonnes" = 5)
 
+table(data_complete$ConEval_num, useNA = "always")
 
-#table(data_complete$Con_num, data_complete$ConEval_num)
 
 ### perception of threat variables ###
 
@@ -174,11 +176,10 @@ data_complete <- data_complete %>%
 # si on va dans le sens, on ressent de + en + de menace de 1 à 5 SantePos est en fait la reverse de CCNegR.
 # on renomme ce couple: SanteR pour SantePos et Sante pour CCNegR.
 
-table(data_complete$ATTMENACE.SantePos.)
 
 data_complete <- data_complete %>%
-  mutate(ATTMENACE.SantePos. = 6 - ATTMENACE.SantePos.)
-table(data_complete$ATTMENACE.SantePos.)
+  mutate(ATTMENACE.SantePos. = 6 - as.numeric(ATTMENACE.SantePos.))
+
 
 names(data_complete)[names(data_complete)=="ATTMENACE.SantePos."]<-"ATTMENACE.SanteR." #je pense que les forêts française sont en bonne santé.
 names(data_complete)[names(data_complete)=="ATTMENACE.CCNegR."]<-"ATTMENACE.Sante." # je ne pense pas que les forêts françaises soient en forme.
@@ -187,35 +188,35 @@ names(data_complete)[names(data_complete)=="ATTMENACE.CCNegR."]<-"ATTMENACE.Sant
 # pour CCNeg: le changement climatique fait peser de graves risques... CC
 
 data_complete <- data_complete %>%
-  mutate(ATTMENACE.SantePosR. = 6 - ATTMENACE.SantePosR.)
+  mutate(ATTMENACE.SantePosR. = 6 - as.numeric(ATTMENACE.SantePosR.))
 names(data_complete)[names(data_complete)=="ATTMENACE.SantePosR."]<-"ATTMENACE.CCR." 
 names(data_complete)[names(data_complete)=="ATTMENACE.CCNeg."]<-"ATTMENACE.CC." 
 
 # pour GestionPos; je pense que les forêts sont gérées durablement (si on garde la même logique c'est une R) -> GestionR.
 # correspond à GestionNeg : l'exploitation des forêts menace leur intégrité -> Gestion
 data_complete <- data_complete %>%
-  mutate(ATTMENACE.GestionPos. = 6 - ATTMENACE.GestionPos.)
+  mutate(ATTMENACE.GestionPos. = 6 - as.numeric(ATTMENACE.GestionPos.))
 names(data_complete)[names(data_complete)=="ATTMENACE.GestionPos."]<-"ATTMENACE.GestionR." 
 names(data_complete)[names(data_complete)=="ATTMENACE.GestionNeg."]<-"ATTMENACE.Gestion." 
 
 # pour GestionPosR ; la déforestation n'est pas un probleme (si on garde la même logique c'est une R) -> DefoR.
 # correspond à GestionNegR : la déforestation n'épargne pas les forêt -> Defo
 data_complete <- data_complete %>%
-  mutate(ATTMENACE.GestionPosR. = 6 - ATTMENACE.GestionPosR.)
+  mutate(ATTMENACE.GestionPosR. = 6 - as.numeric(ATTMENACE.GestionPosR.))
 names(data_complete)[names(data_complete)=="ATTMENACE.GestionPosR."]<-"ATTMENACE.DefoR." 
 names(data_complete)[names(data_complete)=="ATTMENACE.GestioNegR."]<-"ATTMENACE.Defo." 
 
 # InqNegR: je ne pense pas que l'exploitation endommagera la planete (si on garde la meme logique, c'est un R) -> InqR
 # correspond a InqPos: je pense que l'exploitation impactera notre BE (Inq)
 data_complete <- data_complete %>%
-  mutate(ATTMENACE.InqNegR. = 6 - ATTMENACE.InqNegR.)
+  mutate(ATTMENACE.InqNegR. = 6 - as.numeric(ATTMENACE.InqNegR.))
 names(data_complete)[names(data_complete)=="ATTMENACE.InqNegR."]<-"ATTMENACE.InqR." 
 names(data_complete)[names(data_complete)=="ATTMENACE.InqPos."]<-"ATTMENACE.Inq." 
 
 # InqNeg: je suis plutot optimiste: c'est une R -> NoptR
 # correspond à InqPosR: je ne suis pas optimiste -> Nopt
 data_complete <- data_complete %>%
-  mutate(ATTMENACE.InqNeg. = 6 - ATTMENACE.InqNeg.)
+  mutate(ATTMENACE.InqNeg. = 6 - as.numeric(ATTMENACE.InqNeg.))
 names(data_complete)[names(data_complete)=="ATTMENACE.InqNeg."]<-"ATTMENACE.NoptR." 
 names(data_complete)[names(data_complete)=="ATTMENACE.InqPosR."]<-"ATTMENACE.Nopt." 
 
@@ -289,7 +290,11 @@ data_complete <- data_complete %>%
     ProxChauf2_bois = ifelse(ProxChauf2clean == "Bois", 1, 0)
   )
 
-data_complete$ProxChauf_bois1<-ifelse(data_complete$ProxChauf2_bois==1 | data_complete$ProxChauf_bois==1, 1, 0)
+data_complete$ProxChauf_bois1<-ifelse((data_complete$ProxChauf2_bois==1 | data_complete$ProxChauf_bois==1), 1, 0)
+data_complete$ProxChauf_bois1<-ifelse(is.na(data_complete$ProxChauf_bois1) ,0 ,  data_complete$ProxChauf_bois1)
+
+table(data_complete$ProxChauf_bois1, useNA = "always")
+
 
 # propriété
 
@@ -320,6 +325,8 @@ data_complete <- data_complete %>%
     ProxLog_Bois = ifelse(ProxLog == "Oui, entièrement (ex. ossature bois)" | ProxLog == "Oui, partiellement (ex. charpente seulement)", 1, 0),
     ProxLog_Autre = ifelse(ProxLog == "Non", 1, 0) )
 
+table(data_complete$ProxLog_Bois, useNA = "always")
+
 # PNR 
 
 table(data_complete$ProxPnr)
@@ -337,6 +344,7 @@ data_complete <- data_complete %>%
     ProxProm_Peu = ifelse(ProxProm == "Moins d’une fois par mois" | ProxProm=="Au moins une fois par mois", 1, 0),
     ProxProm_Souvent = ifelse(ProxProm == "Au moins une fois par semaine"| ProxProm=="Tous les jours", 1, 0) )
 
+
 ### environmental attitudes ###
 data_complete <- data_complete %>%
   mutate(across(starts_with("ATTENV"),
@@ -351,7 +359,7 @@ data_complete <- data_complete %>%
 
 data_complete <- data_complete %>%
   mutate(across(starts_with("ATTENV") & ends_with("R."),
-    ~ 6 - .
+                ~ 6 - as.numeric(.)
   ))
 
 
@@ -370,7 +378,7 @@ data_complete <- data_complete %>%
 
 data_complete <- data_complete %>%
   mutate(across(starts_with("ATTFO") & ends_with("R."),
-                ~ 6 - .
+                ~ 6 - as.numeric(.)
   ))
 ### wood construction attitude ###
 data_complete <- data_complete %>%
@@ -386,7 +394,7 @@ data_complete <- data_complete %>%
 
 data_complete <- data_complete %>%
   mutate(across(starts_with("ATTBC") & ends_with("R."),
-                ~ 6 - .
+                ~ 6 - as.numeric(.)
   ))
 ### wood energy attitude ###
 data_complete <- data_complete %>%
@@ -402,20 +410,12 @@ data_complete <- data_complete %>%
 
 data_complete <- data_complete %>%
   mutate(across(starts_with("ATTBE") & ends_with("R."),
-                ~ 6 - .
+                ~ 6 - as.numeric(.)
   ))
 
-### vérifier les colinéarités ###
-
-data_new<-data_complete[,c("ATTMENACE.Sante.","ATTMENACE.SanteR.","ATTMENACE.CC.","ATTMENACE.CCR.","ATTMENACE.Gestion.","ATTMENACE.GestionR.","ATTMENACE.Defo.","ATTMENACE.DefoR.","ATTMENACE.InqR.","ATTMENACE.Inq.","ATTMENACE.Nopt.", "ATTMENACE.NoptR.")]
-
-cor(data_new)
-
 ## ------------------------------------------------------------------------- ##
-#                         test the SEM model                                  #
+#                test the SEM modelprogressively                              #
 ## ------------------------------------------------------------------------- ##
-library(lavaan)
-ordered_vars <- grep("^ATT", names(data_complete), value = TRUE)
 
 model <- '
   ##############################
@@ -423,9 +423,46 @@ model <- '
   ##############################
 
   # First-order factors
-  Proximity =~ ProxChauf_bois + ProxTravail   + ProxLog_Bois  + ProxPnr  + ProxProm_Souvent 
+  Proximity =~ ProxChauf_bois1  + ProxTravail   + ProxLog_Bois  + ProxPnr  + ProxProm_Souvent + ProxRes + ProxRes2
+
+'
+fit <- sem(model, data = data_complete)
+summary(fit, fit.measures = TRUE, standardized = TRUE)
+modindices(fit, sort = TRUE, minimum.value = 5)
+
+library(semPlot)
+
+## ------------------------------------------------------------------------- ##
+#                         test the SEM model                                  #
+## ------------------------------------------------------------------------- ##
+library(lavaan)
+ordered_vars <- grep("^ATT", names(data_complete), value = TRUE)
+
+table<-data_complete[,c("id","ProxChauf_bois1","ProxTravail","ProxLog_Bois","ProxPnr","ProxProm_Souvent","ConEssence_num","ConSurface_num","ConSurface2_num","ConGestion_num","ConRecolte_num","ConEval_num","ConProp_num","SocioAge_Jeune","SocioAge_Vieux","SocioGenre_Femme","SocioCom_Grande", "SocioCom_Rural","SocioEduc_sup","SocioEduc_inf","SocioRevenu_num" )]
+str(table)
+
+str(data_complete[, ordered_vars])
+data_complete[, ordered_vars] <- lapply(
+  data_complete[, ordered_vars],
+  function(x) {
+    if (!is.ordered(x)) {
+      factor(x, ordered = TRUE)
+    } else {
+      x
+    }
+  }
+)
+
+
+model <- '
+  ##############################
+  # 1) MEASUREMENT MODEL
+  ##############################
+
+  # First-order factors
+  Proximity =~ ProxChauf_bois1 + ProxTravail   + ProxLog_Bois  + ProxPnr  + ProxProm_Souvent 
   Threat =~ ATTMENACE.Sante. + ATTMENACE.SanteR. + ATTMENACE.CC. + ATTMENACE.CCR. + ATTMENACE.Gestion. + ATTMENACE.GestionR. + ATTMENACE.Defo. + ATTMENACE.DefoR. + ATTMENACE.InqR. + ATTMENACE.Inq. 
-  Knowledge =~ ConEssence + ConSurface + ConSurface2 + ConGestion + ConRecolte + ConEval_num + ConProp 
+  Knowledge =~ ConEssence_num + ConSurface_num + ConSurface2_num + ConGestion_num + ConRecolte_num + ConEval_num + ConProp_num 
   Env_Preserv =~ ATTENV.P1R. +ATTENV.P1. + ATTENV.P2. + ATTENV.P2R. + ATTENV.P6R. + ATTENV.P6. + ATTENV.P8R. +ATTENV.P8. +ATTENV.P12.+ATTENV.P12R.
   Env_Util =~ ATTENV.U4. +ATTENV.U4R. + ATTENV.U5R. + ATTENV.U5. + ATTENV.U7R. + ATTENV.U7. + ATTENV.U9. + ATTENV.U9R. + ATTENV.U10.+ ATTENV.U10R.
   Fo_Preserv =~ ATTFO.P1.+ATTFO.P1R.+ATTFO.P2.+ATTFO.P2R.+ATTFO.P3.+ATTFO.P3R.+ATTFO.P6.+ATTFO.P6R.+ATTFO.P8.+ATTFO.P8R.
