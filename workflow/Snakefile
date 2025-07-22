@@ -14,7 +14,7 @@ include: 'rules/likert_desc.smk'
 # target rule
 rule all:
     input:
-        expand('results/plots/likert_desc_{att}.{ext}',
+        expand('results/plots/likert_desc/likert_desc_{att}.{ext}',
                att = config['attitudes_codes'],
                ext = ['png', 'svg']),
         'results/output/code_quest.csv'

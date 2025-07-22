@@ -3,7 +3,7 @@ rule likert_desc:
         'resources/inhouse/results_survey857139_code.csv',
         'results/output/code_quest.csv'
     output:
-        expand('results/plots/likert_desc_{att}.{ext}',
+        expand('results/plots/likert_desc/likert_desc_{att}.{ext}',
                att = config['attitudes_codes'],
                ext = ['png', 'svg'])
     params:
