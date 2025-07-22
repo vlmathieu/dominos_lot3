@@ -4,13 +4,17 @@ from snakemake.utils import min_version
 min_version('8.16.0')
 
 # parameters from the config file
-# configfile: 
-#     'config/config.yaml'
+configfile: 
+    'config/config.yaml'
 
 # load rules
 include: 'rules/corr_code_quest.smk'
+include: 'rules/likert_desc.smk'
 
 # target rule
 rule all:
     input:
+        expand('results/plots/likert_desc_{att}.{ext}',
+               att = config['attitudes_codes'],
+               ext = ['png', 'svg']),
         'results/output/code_quest.csv'
