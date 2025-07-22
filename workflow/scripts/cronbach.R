@@ -24,11 +24,19 @@ corr_code_quest <- as_tibble(read.csv(file = snakemake@input[[2]],
 #                                       header = TRUE,
 #                                       sep = ";"))
 
-# Filter data to keep likert columns on attitudes
+# Encode data for cronbach computation
 lik <- dat |>
+  # Filter data to keep likert columns on attitudes
   select(contains("ATT")) |>
   filter_all(all_vars(. != "")) |>
-  dplyr::rename_all(~ gsub(".{1}$", "", .)) # remove "." at end of column to match codes and question # nolint
+  dplyr::rename_all(~ gsub(".{1}$", "", .)) |> # remove "." at end of column to match codes and question # nolint
+  # Encode likert scale data
+  mutate_all(~replace(., . == "Tout à fait d'accord", 5)) |> # nolint
+  mutate_all(~replace(., . == "Plutôt d'accord", 4)) |> # nolint
+  mutate_all(~replace(., . == "Ni d'accord ni pas d'accord", 3)) |> # nolint
+  mutate_all(~replace(., . == "Plutôt pas d'accord", 2)) |> # nolint
+  mutate_all(~replace(., . == "Pas du tout d'accord", 1)) |> # nolint
+  mutate_if(is.character, as.numeric)
 
 # Correspondance between attitude codes and descriptions
 corr_att <- tibble(code = snakemake@params$att) |>
@@ -49,17 +57,11 @@ att_env_codes <- c(
 )
 att_env_keys <- c(rep(1, 7), rep(-1, 7), rep(-1, 5), rep(1, 5))
 
-lik_att_env_encoded <- lik |>
+cronbach_att_env <- lik |>
   select(all_of(att_env_codes)) |>
-  mutate_all(~replace(., . == "Tout à fait d'accord", 5)) |> # nolint
-  mutate_all(~replace(., . == "Plutôt d'accord", 4)) |> # nolint
-  mutate_all(~replace(., . == "Ni d'accord ni pas d'accord", 3)) |> # nolint
-  mutate_all(~replace(., . == "Plutôt pas d'accord", 2)) |> # nolint
-  mutate_all(~replace(., . == "Pas du tout d'accord", 1)) |> # nolint
-  mutate_if(is.character, as.numeric) |>
-  as.data.frame()
+  as.data.frame() |>
+  psych::alpha(keys = att_env_keys)
 
-cronbach_att_env <- psych::alpha(lik_att_env_encoded, keys = att_env_keys)
 message("\n\n--- CRONBACH ALPHA | ATTITUDES TOWARD THE ENVIRONMENT ---\n")
 print(cronbach_att_env)
 
@@ -72,17 +74,11 @@ att_fo_codes <- c(
 )
 att_fo_keys <- c(rep(1, 5), rep(-1, 5), rep(-1, 5), rep(1, 5))
 
-lik_att_fo_encoded <- lik |>
+cronbach_att_fo <- lik |>
   select(all_of(att_fo_codes)) |>
-  mutate_all(~replace(., . == "Tout à fait d'accord", 5)) |> # nolint
-  mutate_all(~replace(., . == "Plutôt d'accord", 4)) |> # nolint
-  mutate_all(~replace(., . == "Ni d'accord ni pas d'accord", 3)) |> # nolint
-  mutate_all(~replace(., . == "Plutôt pas d'accord", 2)) |> # nolint
-  mutate_all(~replace(., . == "Pas du tout d'accord", 1)) |> # nolint
-  mutate_if(is.character, as.numeric) |>
-  as.data.frame()
+  as.data.frame() |>
+  psych::alpha(keys = att_fo_keys)
 
-cronbach_att_fo <- psych::alpha(lik_att_fo_encoded, keys = att_fo_keys)
 message("\n\n---CRONBACH ALPHA | ATTITUDES TOWARD FORESTS ---\n")
 print(cronbach_att_fo)
 
@@ -94,17 +90,11 @@ att_be_codes <- c(
 )
 att_be_keys <- c(rep(1, 6), rep(-1, 8))
 
-lik_att_be_encoded <- lik |>
+cronbach_att_be <- lik |>
   select(all_of(att_be_codes)) |>
-  mutate_all(~replace(., . == "Tout à fait d'accord", 5)) |> # nolint
-  mutate_all(~replace(., . == "Plutôt d'accord", 4)) |> # nolint
-  mutate_all(~replace(., . == "Ni d'accord ni pas d'accord", 3)) |> # nolint
-  mutate_all(~replace(., . == "Plutôt pas d'accord", 2)) |> # nolint
-  mutate_all(~replace(., . == "Pas du tout d'accord", 1)) |> # nolint
-  mutate_if(is.character, as.numeric) |>
-  as.data.frame()
+  as.data.frame() |>
+  psych::alpha(keys = att_be_keys)
 
-cronbach_att_be <- psych::alpha(lik_att_be_encoded, keys = att_be_keys)
 message("\n\n---CRONBACH ALPHA | ATTITUDES TOWARD WOOD FOR ENERGY ---\n")
 print(cronbach_att_be)
 
@@ -115,17 +105,11 @@ att_bc_codes <- c(
 )
 att_bc_keys <- c(rep(1, 7), rep(-1, 7))
 
-lik_att_bc_encoded <- lik |>
+cronbach_att_bc <- lik |>
   select(all_of(att_bc_codes)) |>
-  mutate_all(~replace(., . == "Tout à fait d'accord", 5)) |> # nolint
-  mutate_all(~replace(., . == "Plutôt d'accord", 4)) |> # nolint
-  mutate_all(~replace(., . == "Ni d'accord ni pas d'accord", 3)) |> # nolint
-  mutate_all(~replace(., . == "Plutôt pas d'accord", 2)) |> # nolint
-  mutate_all(~replace(., . == "Pas du tout d'accord", 1)) |> # nolint
-  mutate_if(is.character, as.numeric) |>
-  as.data.frame()
+  as.data.frame() |>
+  psych::alpha(keys = att_bc_keys)
 
-cronbach_att_bc <- psych::alpha(lik_att_bc_encoded, keys = att_bc_keys)
 message("\n\n--- CRONBACH ALPHA | ATTITUDES TOWARD WOOD FOR CONSTRUCTION ---\n")
 print(cronbach_att_bc)
 
