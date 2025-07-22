@@ -10,10 +10,12 @@ configfile:
 # load rules
 include: 'rules/corr_code_quest.smk'
 include: 'rules/likert_desc.smk'
+include: 'rules/cronbach.smk'
 
 # target rule
 rule all:
     input:
+        'results/plots/cronbach_alpha/cronbach_alpha.tex',
         expand('results/plots/likert_desc/likert_desc_{att}.{ext}',
                att = config['attitudes_codes'],
                ext = ['png', 'svg']),
