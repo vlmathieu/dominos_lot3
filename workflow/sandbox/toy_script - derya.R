@@ -17,15 +17,15 @@ data <- read.csv(file = path, header = TRUE, sep = ";", na.strings=c("","NA"))
 data_complete <- data[!is.na(data$submitdate), ] #regarder un peu plus ou est ce qu'ils se sont arrétés
 data_complete <- data_complete[data_complete$SocioGenre!="Autre", ] #concerne seulement 3 répondants
 
+### tables attitudes
+
+
 ### recodage variables socioeconomiques ###
 
 ## CSP
 
-# print réponses:
-ocsp<-unique(data_complete$SocioCSP.other.)
-csp<-unique(data_complete$SocioCSP)
-print(ocsp)
-print(csp)
+print(unique(data_complete$SocioCSP))
+print(unique(data_complete$SocioCSP.other.))
 
 data_complete$SocioCSPclean<-NA
 
@@ -416,6 +416,7 @@ data_complete <- data_complete %>%
 ## ------------------------------------------------------------------------- ##
 #                test the SEM modelprogressively                              #
 ## ------------------------------------------------------------------------- ##
+library(lavaan)
 
 model <- '
   ##############################
@@ -435,7 +436,6 @@ library(semPlot)
 ## ------------------------------------------------------------------------- ##
 #                         test the SEM model                                  #
 ## ------------------------------------------------------------------------- ##
-library(lavaan)
 ordered_vars <- grep("^ATT", names(data_complete), value = TRUE)
 
 table<-data_complete[,c("id","ProxChauf_bois1","ProxTravail","ProxLog_Bois","ProxPnr","ProxProm_Souvent","ConEssence_num","ConSurface_num","ConSurface2_num","ConGestion_num","ConRecolte_num","ConEval_num","ConProp_num","SocioAge_Jeune","SocioAge_Vieux","SocioGenre_Femme","SocioCom_Grande", "SocioCom_Rural","SocioEduc_sup","SocioEduc_inf","SocioRevenu_num" )]
