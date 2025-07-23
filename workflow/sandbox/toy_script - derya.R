@@ -19,6 +19,7 @@ data_complete <- data_complete[data_complete$SocioGenre!="Autre", ] #concerne se
 
 ### tables attitudes
 
+table<-as.data.frame(grep("^ATT",colnames(data_complete),value=T))
 
 ### recodage variables socioeconomiques ###
 
@@ -396,7 +397,12 @@ data_complete <- data_complete %>%
   mutate(across(starts_with("ATTBC") & ends_with("R."),
                 ~ 6 - as.numeric(.)
   ))
+
 ### wood energy attitude ###
+colnames(data_complete)
+names(data_complete)[names(data_complete)=="ATTBE.Tech."]<-"ATTBE.TechR1."
+names(data_complete)[names(data_complete)=="ATTBE.TechR."]<-"ATTBE.Tech.R2."
+
 data_complete <- data_complete %>%
   mutate(across(starts_with("ATTBE"),
     ~ factor(recode(.,
@@ -412,6 +418,27 @@ data_complete <- data_complete %>%
   mutate(across(starts_with("ATTBE") & ends_with("R."),
                 ~ 6 - as.numeric(.)
   ))
+data_complete <- data_complete %>%
+  mutate(across(starts_with("ATTBE") & ends_with("R1."),
+                ~ 6 - as.numeric(.)
+  ))
+data_complete <- data_complete %>%
+  mutate(across(starts_with("ATTBE") & ends_with("R2."),
+                ~ 6 - as.numeric(.)
+  ))
+
+### new tables attitudes
+
+newtable<-as.data.frame(grep("^ATT",colnames(data_complete),value=T))
+corr_table<-cbind(table, newtable)
+colnames(corr_table) <- c("code1", "code2")
+
+### add attitudes names
+code_quest<-read.csv("~/recherche/DOMINOS/dominos_github/results/output/code_quest.csv", sep=";")
+code_quest <- code_quest[grepl("ATT", code_quest$code), ]
+corr_table<-cbind(corr_table, code_quest)
+corr_table$code<-NULL
+write.csv(corr_table, "~/recherche/DOMINOS/dominos_github/results/output/recode_quest.csv")
 
 ## ------------------------------------------------------------------------- ##
 #                test the SEM modelprogressively                              #
