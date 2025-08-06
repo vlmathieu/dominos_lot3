@@ -6,6 +6,7 @@ library("ggplot2") # For plotting sophisticated graphs
 library("rio") # For plotting sophisticated graphs
 library("ggstats") # For plotting sophisticated graphs
 library("labelled")
+library("lavaan")
 
 path <- "~/recherche/DOMINOS/dominos_github/resources/inhouse/results_survey857139_code.csv" # nolint
 data <- read.csv(file = path, header = TRUE, sep = ";", na.strings=c("","NA"))
@@ -357,6 +358,7 @@ data_complete <- data_complete %>%
                                 "Tout à fait d'accord" = 5),
                          ordered = TRUE,levels = 1:5)
   ))
+table(data_complete$ATTENV.P1.,data_complete$ATTENV.P1R. )
 
 data_complete <- data_complete %>%
   mutate(across(starts_with("ATTENV") & ends_with("R."),
@@ -401,7 +403,7 @@ data_complete <- data_complete %>%
 ### wood energy attitude ###
 colnames(data_complete)
 names(data_complete)[names(data_complete)=="ATTBE.Tech."]<-"ATTBE.TechR1."
-names(data_complete)[names(data_complete)=="ATTBE.TechR."]<-"ATTBE.Tech.R2."
+names(data_complete)[names(data_complete)=="ATTBE.TechR."]<-"ATTBE.TechR2."
 
 data_complete <- data_complete %>%
   mutate(across(starts_with("ATTBE"),
@@ -440,29 +442,8 @@ corr_table<-cbind(corr_table, code_quest)
 corr_table$code<-NULL
 write.csv(corr_table, "~/recherche/DOMINOS/dominos_github/results/output/recode_quest.csv")
 
-## ------------------------------------------------------------------------- ##
-#                test the SEM modelprogressively                              #
-## ------------------------------------------------------------------------- ##
-library(lavaan)
 
-model <- '
-  ##############################
-  # 1) MEASUREMENT MODEL
-  ##############################
-
-  # First-order factors
-  Proximity =~ ProxChauf_bois1  + ProxTravail   + ProxLog_Bois  + ProxPnr  + ProxProm_Souvent + ProxRes + ProxRes2
-
-'
-fit <- sem(model, data = data_complete)
-summary(fit, fit.measures = TRUE, standardized = TRUE)
-modindices(fit, sort = TRUE, minimum.value = 5)
-
-library(semPlot)
-
-## ------------------------------------------------------------------------- ##
-#                         test the SEM model                                  #
-## ------------------------------------------------------------------------- ##
+## final cleaning
 ordered_vars <- grep("^ATT", names(data_complete), value = TRUE)
 
 table<-data_complete[,c("id","ProxChauf_bois1","ProxTravail","ProxLog_Bois","ProxPnr","ProxProm_Souvent","ConEssence_num","ConSurface_num","ConSurface2_num","ConGestion_num","ConRecolte_num","ConEval_num","ConProp_num","SocioAge_Jeune","SocioAge_Vieux","SocioGenre_Femme","SocioCom_Grande", "SocioCom_Rural","SocioEduc_sup","SocioEduc_inf","SocioRevenu_num" )]
@@ -481,6 +462,94 @@ data_complete[, ordered_vars] <- lapply(
 )
 
 
+#############################################################################
+# -------------------------------- SEM MODEL -----------------------------  #
+#############################################################################
+# test des corrélations
+env_vars <- grep("^ATTENV", names(data_complete), value = TRUE)
+env_data <- data_complete[, env_vars]
+env_data_num <- data.frame(lapply(env_data, function(x) as.numeric(as.character(x))))
+cor_matrix <- cor(env_data_num, use = "pairwise.complete.obs")
+library(corrplot)
+corrplot(cor_matrix, method = "color", type = "upper", tl.cex = 0.7)
+high_corrs <- which(abs(cor_matrix) > 0.8 & abs(cor_matrix) < 1, arr.ind = TRUE)
+cor_matrix[high_corrs]
+
+# confirmatory factor analysis
+attenv_model<-"
+ATTENVP =~ ATTENV.P1. + ATTENV.P1R. +ATTENV.P2. + ATTENV.P2R. +ATTENV.P6. + ATTENV.P6R. +ATTENV.P8. + ATTENV.P8R. +ATTENV.P12. + ATTENV.P12R.   
+#ATTENVU =~ ATTENV.U4. + ATTENV.U4R. +ATTENV.U5. + ATTENV.U5R. +ATTENV.U7. + ATTENV.U7R. +ATTENV.U9. + ATTENV.U9R. +ATTENV.U10. + ATTENV.U10R.   
+# ATTENV =~ ATTENVP+ATTENVU"
+fit<-cfa(attenv_model, data=data_complete)
+parTable(fit)
+summary(fit, fit.measures=TRUE)
+# see if items are recoded
+
+# -------------------- wood energy attitudes -----------------------------  #
+model_env <- '
+  ##############################
+  # 1) MEASUREMENT MODEL
+  ##############################
+
+  # First-order factors
+  ATTENVP =~ ATTENV.P1. + ATTENV.P1R. +ATTENV.P2. + ATTENV.P2R. +ATTENV.P6. + ATTENV.P6R. +ATTENV.P8. + ATTENV.P8R. +ATTENV.P12. + ATTENV.P12R.   
+  ATTENVU =~ ATTENV.U4. + ATTENV.U4R. +ATTENV.U5. + ATTENV.U5R. +ATTENV.U7. + ATTENV.U7R. +ATTENV.U9. + ATTENV.U9R. +ATTENV.U10. + ATTENV.U10R.   
+
+  
+  # Second-order factor
+  ATTENV =~ ATTENVP+ATTENVU
+
+'
+# --- Fit the model ---
+fit <- sem(model_env, data = data_complete)
+# --- Get summary with fit indices ---
+summary(fit )
+
+# --- Optional: modification indices to inspect improvements ---
+modindices(fit, sort = TRUE, minimum.value = 5)
+
+
+# -------------------- wood energy attitudes -----------------------------  #
+model_bc <- '
+  ##############################
+  # 1) MEASUREMENT MODEL
+  ##############################
+
+  # First-order factors
+  BC_Econ =~ ATTBC.EcomenR. + ATTBC.Ecomen. + ATTBC.EcolocR. + ATTBC.Ecoloc.
+  BC_Ecol =~ ATTBC.DurableR. + ATTBC.Durable. +  ATTBC.OnehealthR. + ATTBC.Onehealth.
+  BC_Conf =~ ATTBC.NatR. + ATTBC.Nat. + ATTBC.Tech. + ATTBC.TechR. + ATTBC.BienEtreR. + ATTBC.BienEtre.
+
+  
+  # Second-order factor
+  AttBC =~ BC_Econ + BC_Ecol + BC_Conf
+
+# variances
+  #ATTBC.EcomenR. ~~ ATTBC.Ecomen.
+  #ATTBC.EcolocR. ~~ ATTBC.Ecoloc.
+  #ATTBC.DurableR. ~~ ATTBC.Durable.
+  #ATTBC.OnehealthR. ~~ ATTBC.Onehealth.
+  #ATTBC.NatR. ~~ ATTBC.Nat.
+ # ATTBC.Tech. ~~ ATTBC.TechR.
+  #ATTBC.BienEtreR. ~~ ATTBC.BienEtre.
+
+# covariances
+#BC_Econ ~~ BC_Ecol
+#BC_Ecol ~~ BC_Conf
+#BC_Econ ~~ BC_Conf
+
+'
+# --- Fit the model ---
+fit <- sem(model_bc, data = data_complete)
+# --- Get summary with fit indices ---
+summary(fit )
+
+# --- Optional: modification indices to inspect improvements ---
+modindices(fit, sort = TRUE, minimum.value = 5)
+
+
+
+# ----------------------- full model -----------------------------------#
 model <- '
   ##############################
   # 1) MEASUREMENT MODEL
@@ -526,7 +595,7 @@ model <- '
 
 '
 # --- Fit the model ---
-fit <- sem(model, data = data_complete, ordered = ordered_vars)
+fit <- sem(model, data = data_complete)
 # --- Get summary with fit indices ---
 summary(fit, fit.measures = TRUE, standardized = TRUE)
 
