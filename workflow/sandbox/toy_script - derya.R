@@ -460,6 +460,10 @@ data_complete[, ordered_vars] <- lapply(
     }
   }
 )
+######### tout remettre en numéric
+
+data_complete <- data_complete %>%
+  mutate(across(starts_with("ATT"), as.numeric))
 
 
 #############################################################################
@@ -475,136 +479,36 @@ corrplot(cor_matrix, method = "color", type = "upper", tl.cex = 0.7)
 high_corrs <- which(abs(cor_matrix) > 0.8 & abs(cor_matrix) < 1, arr.ind = TRUE)
 cor_matrix[high_corrs]
 
-# confirmatory factor analysis
+################ confirmatory factor analysis #########################
+
+# MARKER METOD
 attenv_model<-"
 ATTENVP =~ ATTENV.P1. + ATTENV.P1R. +ATTENV.P2. + ATTENV.P2R. +ATTENV.P6. + ATTENV.P6R. +ATTENV.P8. + ATTENV.P8R. +ATTENV.P12. + ATTENV.P12R.   
-#ATTENVU =~ ATTENV.U4. + ATTENV.U4R. +ATTENV.U5. + ATTENV.U5R. +ATTENV.U7. + ATTENV.U7R. +ATTENV.U9. + ATTENV.U9R. +ATTENV.U10. + ATTENV.U10R.   
-# ATTENV =~ ATTENVP+ATTENVU"
+ATTENVU =~ ATTENV.U4. + ATTENV.U4R. +ATTENV.U5. + ATTENV.U5R. +ATTENV.U7. + ATTENV.U7R. +ATTENV.U9. + ATTENV.U9R. +ATTENV.U10. + ATTENV.U10R.   "
 fit<-cfa(attenv_model, data=data_complete)
-parTable(fit)
 summary(fit, fit.measures=TRUE)
-# see if items are recoded
 
-# -------------------- wood energy attitudes -----------------------------  #
-model_env <- '
-  ##############################
-  # 1) MEASUREMENT MODEL
-  ##############################
+# Variance std method
+attenv_model2<-"
+ATTENVP =~ NA*ATTENV.P1. + ATTENV.P1R. +ATTENV.P2. + ATTENV.P2R. +ATTENV.P6. + ATTENV.P6R. +ATTENV.P8. + ATTENV.P8R. +ATTENV.P12. + ATTENV.P12R.   
+ATTENVP ~~ 1*ATTENVP
+"
 
-  # First-order factors
-  ATTENVP =~ ATTENV.P1. + ATTENV.P1R. +ATTENV.P2. + ATTENV.P2R. +ATTENV.P6. + ATTENV.P6R. +ATTENV.P8. + ATTENV.P8R. +ATTENV.P12. + ATTENV.P12R.   
-  ATTENVU =~ ATTENV.U4. + ATTENV.U4R. +ATTENV.U5. + ATTENV.U5R. +ATTENV.U7. + ATTENV.U7R. +ATTENV.U9. + ATTENV.U9R. +ATTENV.U10. + ATTENV.U10R.   
+fit<-cfa(attenv_model2, data=data_complete) #or use std.lv=TRUE
+summary(fit, fit.measures=TRUE)
 
-  
-  # Second-order factor
-  ATTENV =~ ATTENVP+ATTENVU
+# short cut way (marker method + std method) --> best solution 
+attenv_model3<-"
+ATTENVP =~ ATTENV.P1. + ATTENV.P1R. +ATTENV.P2. + ATTENV.P2R. +ATTENV.P6. + ATTENV.P6R. +ATTENV.P8. + ATTENV.P8R. +ATTENV.P12. + ATTENV.P12R.   
+"
+fit<-cfa(attenv_model3, data=data_complete) #or use std.lv=TRUE
 
-'
-# --- Fit the model ---
-fit <- sem(model_env, data = data_complete)
-# --- Get summary with fit indices ---
-summary(fit )
+summary(fit, standardized=TRUE) 
 
-# --- Optional: modification indices to inspect improvements ---
-modindices(fit, sort = TRUE, minimum.value = 5)
+# with intercept ## does not converge
 
-
-# -------------------- wood energy attitudes -----------------------------  #
-model_bc <- '
-  ##############################
-  # 1) MEASUREMENT MODEL
-  ##############################
-
-  # First-order factors
-  BC_Econ =~ ATTBC.EcomenR. + ATTBC.Ecomen. + ATTBC.EcolocR. + ATTBC.Ecoloc.
-  BC_Ecol =~ ATTBC.DurableR. + ATTBC.Durable. +  ATTBC.OnehealthR. + ATTBC.Onehealth.
-  BC_Conf =~ ATTBC.NatR. + ATTBC.Nat. + ATTBC.Tech. + ATTBC.TechR. + ATTBC.BienEtreR. + ATTBC.BienEtre.
-
-  
-  # Second-order factor
-  AttBC =~ BC_Econ + BC_Ecol + BC_Conf
-
-# variances
-  #ATTBC.EcomenR. ~~ ATTBC.Ecomen.
-  #ATTBC.EcolocR. ~~ ATTBC.Ecoloc.
-  #ATTBC.DurableR. ~~ ATTBC.Durable.
-  #ATTBC.OnehealthR. ~~ ATTBC.Onehealth.
-  #ATTBC.NatR. ~~ ATTBC.Nat.
- # ATTBC.Tech. ~~ ATTBC.TechR.
-  #ATTBC.BienEtreR. ~~ ATTBC.BienEtre.
-
-# covariances
-#BC_Econ ~~ BC_Ecol
-#BC_Ecol ~~ BC_Conf
-#BC_Econ ~~ BC_Conf
-
-'
-# --- Fit the model ---
-fit <- sem(model_bc, data = data_complete)
-# --- Get summary with fit indices ---
-summary(fit )
-
-# --- Optional: modification indices to inspect improvements ---
-modindices(fit, sort = TRUE, minimum.value = 5)
-
-
-
-# ----------------------- full model -----------------------------------#
-model <- '
-  ##############################
-  # 1) MEASUREMENT MODEL
-  ##############################
-
-  # First-order factors
-  Proximity =~ ProxChauf_bois1 + ProxTravail   + ProxLog_Bois  + ProxPnr  + ProxProm_Souvent 
-  Threat =~ ATTMENACE.Sante. + ATTMENACE.SanteR. + ATTMENACE.CC. + ATTMENACE.CCR. + ATTMENACE.Gestion. + ATTMENACE.GestionR. + ATTMENACE.Defo. + ATTMENACE.DefoR. + ATTMENACE.InqR. + ATTMENACE.Inq. 
-  Knowledge =~ ConEssence_num + ConSurface_num + ConSurface2_num + ConGestion_num + ConRecolte_num + ConEval_num + ConProp_num 
-  Env_Preserv =~ ATTENV.P1R. +ATTENV.P1. + ATTENV.P2. + ATTENV.P2R. + ATTENV.P6R. + ATTENV.P6. + ATTENV.P8R. +ATTENV.P8. +ATTENV.P12.+ATTENV.P12R.
-  Env_Util =~ ATTENV.U4. +ATTENV.U4R. + ATTENV.U5R. + ATTENV.U5. + ATTENV.U7R. + ATTENV.U7. + ATTENV.U9. + ATTENV.U9R. + ATTENV.U10.+ ATTENV.U10R.
-  Fo_Preserv =~ ATTFO.P1.+ATTFO.P1R.+ATTFO.P2.+ATTFO.P2R.+ATTFO.P3.+ATTFO.P3R.+ATTFO.P6.+ATTFO.P6R.+ATTFO.P8.+ATTFO.P8R.
-  Fo_Util =~ ATTFO.U4. + ATTFO.U4R. + ATTFO.U5R. + ATTFO.U5. + ATTFO.U7R. + ATTFO.U7. + ATTFO.U9. + ATTFO.U9R. + ATTFO.U10R. + ATTFO.U10.
-  EW_Econ =~ ATTBE.EcomenR. + ATTBE.Ecomen. + ATTBE.EcolocR. + ATTBE.Ecoloc.
-  EW_Ecol =~ ATTBE.DurableR. + ATTBE.Durable. +  ATTBE.HealthR. + ATTBE.Health.
-  EW_Conf =~ ATTBE.NatureR. + ATTBE.Nature. + ATTBE.TechR. + ATTBE.Tech. + ATTBE.BienEtreR. + ATTBE.BienEtre.
-  CW_Econ =~ ATTBC.EcomenR. + ATTBC.Ecomen. + ATTBC.EcolocR. + ATTBC.Ecoloc.
-  CW_Ecol =~ ATTBC.DurableR. + ATTBC.Durable. +  ATTBC.OnehealthR. + ATTBC.Onehealth.
-  CW_Conf =~ ATTBC.NatR. + ATTBC.Nat. + ATTBC.TechR. + ATTBC.Tech. + ATTBC.BienEtreR. + ATTBC.BienEtre.
-
-  
-  # Second-order factor
-  AttEnv =~ Env_Preserv + Env_Util
-  AttFo =~ Fo_Preserv + Fo_Util 
-  AttEW =~ EW_Ecol + EW_Econ + EW_Conf
-  AttCW =~ CW_Ecol + CW_Econ + CW_Conf
-  
-  ##############################
-  # 2) STRUCTURAL MODEL
-  ##############################
-  
-  # Socioeconomic observed predictors
-  Threat ~ SocioAge_Jeune + SocioAge_Vieux + SocioGenre_Femme   +   SocioCom_Grande+ SocioCom_Rural    + SocioEduc_sup + SocioEduc_inf  + SocioRevenu_num  + Proximity
-  Knowledge ~ SocioAge_Jeune + SocioAge_Vieux + SocioGenre_Femme   + SocioCom_Rural   + SocioEduc_sup + SocioEduc_inf  + SocioRevenu_num  + Proximity
-  AttEnv ~ Threat + Knowledge + SocioAge_Jeune + SocioAge_Vieux + SocioGenre_Femme  + SocioCom_Grande + SocioCom_Rural    + SocioEduc_sup + SocioEduc_inf  + SocioRevenu_num + Proximity
-  AttFo ~ Threat + Knowledge +  SocioAge_Jeune + SocioAge_Vieux + SocioGenre_Femme  + SocioCom_Grande + SocioCom_Rural    + SocioEduc_sup + SocioEduc_inf  + SocioRevenu_num  + Proximity
-  AttCW ~ Threat + Knowledge + SocioAge_Jeune + SocioAge_Vieux + SocioGenre_Femme  + SocioCom_Grande + SocioCom_Rural    + SocioEduc_sup + SocioEduc_inf + SocioRevenu_num + Proximity
-  AttEW ~ Threat + Knowledge   + SocioAge_Jeune + SocioAge_Vieux + SocioGenre_Femme  + SocioCom_Grande + SocioCom_Rural  + SocioEduc_sup + SocioEduc_inf  + SocioRevenu_num  + Proximity
-
-  ##############################
-  # (Optional) Covariances
-  ##############################
-
-'
-# --- Fit the model ---
-fit <- sem(model, data = data_complete)
-# --- Get summary with fit indices ---
-summary(fit, fit.measures = TRUE, standardized = TRUE)
-
-# --- Optional: modification indices to inspect improvements ---
-modindices(fit, sort = TRUE, minimum.value = 5)
-
-library(semPlot)
-
-
-# Pour tracer le path diagram :
-semPaths(fit, what = "std", layout = "tree", edge.label.cex = 0.8)
+attenv_model4<-"
+ATTENVP =~ 1+ ATTENV.P1. + ATTENV.P1R. +ATTENV.P2. + ATTENV.P2R. +ATTENV.P6. + ATTENV.P6R. +ATTENV.P8. + ATTENV.P8R. +ATTENV.P12. + ATTENV.P12R.   
+"
+fit<-cfa(attenv_model4, data=data_complete) #or use std.lv=TRUE
 
