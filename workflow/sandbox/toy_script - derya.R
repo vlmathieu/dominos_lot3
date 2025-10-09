@@ -492,7 +492,7 @@ data_complete<-data_complete[data_complete$ATTFO.test.==5,] # 4702 obs.
 
 
 #############################################################################
-# -------------------------------- SEM MODEL -----------------------------  #
+# -------------------------------- CFA MODEL -----------------------------  #
 #############################################################################
 # test des corrélations env
 env_vars <- grep("^ATTENV", names(data_complete), value = TRUE)
@@ -538,38 +538,17 @@ cor_matrix[high_corrs]
 # short cut way (marker method + std method) --> best solution 
 
 cfa_attenv <- '
-  ATTENVP =~ ATTENV.P1. + ATTENV.P1R. + ATTENV.P2. + ATTENV.P2R. + ATTENV.P6. + ATTENV.P6R. + ATTENV.P8. + ATTENV.P8R. + ATTENV.P12. + ATTENV.P12R.
+  ATTENVP =~ ATTENV.P1. + ATTENV.P1R. + ATTENV.P2. + ATTENV.P2R.+ ATTENV.P3.+ATTENV.P3R. + ATTENV.P6. + ATTENV.P6R. + ATTENV.P8. + ATTENV.P8R. + ATTENV.P12. + ATTENV.P12R. + ATTENV.P11.+ATTENV.P11R.
   ATTENVU =~ ATTENV.U4. + ATTENV.U4R. + ATTENV.U5. + ATTENV.U5R. + ATTENV.U7. + ATTENV.U7R. + ATTENV.U9. + ATTENV.U9R. + ATTENV.U10. + ATTENV.U10R.
   ATTENVP ~~ ATTENVU
 '
 fit_cfa_attenv <- cfa(cfa_attenv, data=data_complete, std.lv=TRUE)
+lavInspect(fit_cfa_attenv, "cov.lv")
 summary(fit_cfa_attenv, standardized=TRUE, fit.measures=TRUE)
 
 
-
-
-node_names <- c(
-  "ATTENVP" = "Env. Preservation",
-  "ATTENVU" = "Env. Utilisation",
-  "ATTENV.P1." = "P1", "ATTENV.P1R." = "P1R", 
-  "ATTENV.P2." = "P2", "ATTENV.P2R." = "P2R", 
-  "ATTENV.P6." = "P6", "ATTENV.P6R." = "P6R", 
-  "ATTENV.P8." = "P8", "ATTENV.P8R." = "P8R", 
-  "ATTENV.P12." = "P12", "ATTENV.P12R." = "P12R", 
-  "ATTENV.U4." = "U4", "ATTENV.U4R." = "U4R",
-  "ATTENV.U5." = "U5", "ATTENV.U5R." = "U5R",
-  "ATTENV.U7." = "U7", "ATTENV.U7R." = "U7R",
-  "ATTENV.U9." = "U9", "ATTENV.U9R." = "U9R",
-  "ATTENV.U10." = "U10", "ATTENV.U10R." = "U10R"
-)
-
- plot_cfa_attenv<-lavaanPlot(
-  model = fit_cfa_attenv,
-  coefs = TRUE,
-  sig = 0.05,
-  covs = TRUE,
-  stars = c("latent","covs"),
-  labels = node_names,   # <- use labels instead of node_names
+ plot_cfa_attenv<-lavaanPlot(  model = fit_cfa_attenv,  coefs = TRUE,  sig = 0.05,  covs = TRUE,  stars = c("latent","covs"),
+ #labels = node_names,   # <- use labels instead of node_names
   graph_options = list(rankdir = "TB", layout = "dot"),
   edge_options = list(color = "grey30", penwidth = 1.5, fontsize = 10)
 )
@@ -578,8 +557,7 @@ node_names <- c(
  
  #### FOREST ATTITUDES ####
  
- # short cut way (marker method + std method) --> best solution 
- 
+
  cfa_attfo <- '
   ATTFOP =~ ATTFO.P1. + ATTFO.P1R. + ATTFO.P2. + ATTFO.P2R. + ATTFO.P6. + ATTFO.P6R. + ATTFO.P8. + ATTFO.P8R. + ATTFO.P3. + ATTFO.P3R.
   ATTFOU =~ ATTFO.U4. + ATTFO.U4R. + ATTFO.U5. + ATTFO.U5R. + ATTFO.U7. + ATTFO.U7R. + ATTFO.U9. + ATTFO.U9R. + ATTFO.U10. + ATTFO.U10R.
@@ -588,29 +566,9 @@ node_names <- c(
  fit_cfa_attfo <- cfa(cfa_attfo, data=data_complete, std.lv=TRUE)
  summary(fit_cfa_attfo, standardized=TRUE, fit.measures=TRUE)
  
- 
- node_names <- c(
-   "ATTFOP" = "Forest Preservation",
-   "ATTFOU" = "Forest Utilisation",
-   "ATTFO.P1." = "P1", "ATTFO.P1R." = "P1R", 
-   "ATTFO.P2." = "P2", "ATTFO.P2R." = "P2R", 
-   "ATTFO.P6." = "P6", "ATTFO.P6R." = "P6R", 
-   "ATTFO.P8." = "P8", "ATTFO.P8R." = "P8R", 
-   "ATTFO.P3." = "P3", "ATTFO.P3R." = "P3R", 
-   "ATTFO.U4." = "U4", "ATTFO.U4R." = "U4R",
-   "ATTFO.U5." = "U5", "ATTFO.U5R." = "U5R",
-   "ATTFO.U7." = "U7", "ATTFO.U7R." = "U7R",
-   "ATTFO.U9." = "U9", "ATTFO.U9R." = "U9R",
-   "ATTFO.U10." = "U10", "ATTFO.U10R." = "U10R"
- )
- 
- plot_cfa_ATTFO<-lavaanPlot(
-   model = fit_cfa_attfo,
-   coefs = TRUE,
-   sig = 0.05,
-   covs = TRUE,
-   stars = c("latent","covs"),
-   labels = node_names,   # <- use labels instead of node_names
+
+ plot_cfa_ATTFO<-lavaanPlot(  model = fit_cfa_attfo,  coefs = TRUE, sig = 0.05, covs = TRUE,stars = c("latent","covs"),
+   #labels = node_names,   # <- use labels instead of node_names
    graph_options = list(rankdir = "TB", layout = "dot"),
    edge_options = list(color = "grey30", penwidth = 1.5, fontsize = 10)
  )
@@ -618,220 +576,84 @@ node_names <- c(
  
  #### WOOD ATTITUDES ####
 
- ### energy
- cfa_ATTBE <- '
-  ATTBECONF =~   ATTBE.BienEtreR. + ATTBE.BienEtre. + ATTBE.TechR1. + ATTBE.TechR2.+ ATTBE.NatureR1. + ATTBE.Nature.
-  ATTBEENV =~ ATTBE.HealthR. + ATTBE.Health. + ATTBE.DurableR. + ATTBE.Durable. 
-  ATTBEECON =~  ATTBE.EcolocR. + ATTBE.Ecoloc. + ATTBE.EcomenR. + ATTBE.Ecomen. 
-ATTBECONF ~~ ATTBEENV
-ATTBEENV  ~~ ATTBEECON
-ATTBEECON  ~~ ATTBECONF
-'
- fit_cfa_ATTBE <- cfa(cfa_ATTBE, data=data_complete, std.lv=TRUE)
- lavInspect(fit_cfa_ATTBE, "cov.lv") ## correlation between ATTBENV et ATTBEECON > 1, not normal
- summary(fit_cfa_ATTBE, standardized=TRUE, fit.measures=TRUE)
- 
- node_names <- c(
-   "ATTBECONF" = "Comfort",
-   "ATTBEENV" = "Environment",
-   "ATTBEECON" = "Economy",
-   "ATTBE.BienEtreR." = "WellBeing.R", "ATTBE.BienEtre." = "WellBeing", 
-   "ATTBE.NatureR1." = "Nature.R", "ATTBE.Nature." = "Nature", 
-   "ATTBE.HealthR." = "Health.R", "ATTBE.Health." = "Health", 
-   "ATTBE.DurableR." = "Sustainable.R", "ATTBE.Durable." = "Sustainable", 
-   "ATTBE.EcolocR." = "EconDev.R", "ATTBE.Ecoloc." = "EconDev", 
-   "ATTBE.EcomenR." = "Econ.R", "ATTBE.Ecomen." = "Econ",
-   "ATTBE.TechR1." = "Tech.R", "ATTBE.TechR2." = "Tech2.R"
- )
- 
- plot_cfa_ATTBE<-lavaanPlot(
-   model = fit_cfa_ATTBE,
-   coefs = TRUE,
-   sig = 0.05,
-   covs = TRUE,
-   stars = c("latent","covs"),
-   labels = node_names,   # <- use labels instead of node_names
-   graph_options = list(rankdir = "TB", layout = "dot"),
-   edge_options = list(color = "grey30", penwidth = 1.5, fontsize = 10)
- )
- save_png(plot_cfa_ATTBE, "~/recherche/DOMINOS/results/plot_cfa_ATTBE.png", width = 1500, height=400)
- 
-# try other model:
- cfa_ATTBE2 <- '
-  ATTBECONF =~   ATTBE.BienEtreR. + ATTBE.BienEtre. + ATTBE.NatureR1. + ATTBE.Nature.
-  ATTBESOC =~ ATTBE.HealthR. + ATTBE.Health. + ATTBE.DurableR. + ATTBE.Durable. + ATTBE.Ecoloc. + ATTBE.EcolocR.
-  ATTBEECON =~  ATTBE.TechR1. + ATTBE.TechR2. + ATTBE.EcomenR. + ATTBE.Ecomen. 
-ATTBECONF ~~ ATTBESOC
-ATTBESOC  ~~ ATTBEECON
-ATTBEECON  ~~ ATTBECONF
-'
- fit_cfa_ATTBE2 <- cfa(cfa_ATTBE2, data=data_complete, std.lv=TRUE)
- lavInspect(fit_cfa_ATTBE2, "cov.lv") ## correlation between ATTBENV et ATTBEECON > 1, not normal
- summary(fit_cfa_ATTBE2, standardized=TRUE, fit.measures=TRUE)
- 
- node_names <- c(
-   "ATTBECONF" = "Comfort",
-   "ATTBESOC" = "Social",
-   "ATTBEECON" = "Economy",
-   "ATTBE.BienEtreR." = "WellBeing.R", "ATTBE.BienEtre." = "WellBeing", 
-   "ATTBE.NatureR1." = "Nature.R", "ATTBE.Nature." = "Nature", 
-   "ATTBE.HealthR." = "Health.R", "ATTBE.Health." = "Health", 
-   "ATTBE.DurableR." = "Sustainable.R", "ATTBE.Durable." = "Sustainable", 
-   "ATTBE.EcolocR." = "EconDev.R", "ATTBE.Ecoloc." = "EconDev", 
-   "ATTBE.EcomenR." = "Econ.R", "ATTBE.Ecomen." = "Econ",
-   "ATTBE.TechR1." = "Tech.R", "ATTBE.TechR2." = "Tech2.R"
- )
- 
- plot_cfa_ATTBE2<-lavaanPlot(
-   model = fit_cfa_ATTBE2,
-   coefs = TRUE,
-   sig = 0.05,
-   covs = TRUE,
-   stars = c("latent","covs"),
-   labels = node_names,   # <- use labels instead of node_names
-   graph_options = list(rankdir = "TB", layout = "dot"),
-   edge_options = list(color = "grey30", penwidth = 1.5, fontsize = 10)
- )
- save_png(plot_cfa_ATTBE2, "~/recherche/DOMINOS/results/plot_cfa_ATTBE2.png", width = 1500, height=400)
-
-
- cfa_ATTBE3 <- '
-  ATTBE_ANTRO =~  ATTBE.EcomenR. + ATTBE.Ecomen. + ATTBE.BienEtreR. + ATTBE.BienEtre. + ATTBE.TechR1. + ATTBE.TechR2.
-  ATTBE_BIO =~ ATTBE.HealthR. + ATTBE.Health. + ATTBE.DurableR. + ATTBE.Durable. + ATTBE.NatureR1. + ATTBE.Nature.
-  ATTBE_ANTRO ~~ ATTBE_BIO
-
-'
- fit_cfa_ATTBE3 <- cfa(cfa_ATTBE3, data = data_complete, std.lv = TRUE)
-
- summary(fit_cfa_ATTBE3, standardized=TRUE, fit.measures=TRUE)
- 
- node_names <- c(
-   "ATTBE_ANTRO" = "Anthropocentric",
-   "ATTBE_BIO" = "Biocentric",
-   "ATTBE.BienEtreR." = "WellBeing.R", "ATTBE.BienEtre." = "WellBeing", 
-   "ATTBE.NatureR1." = "Nature.R", "ATTBE.Nature." = "Nature", 
-   "ATTBE.HealthR." = "Health.R", "ATTBE.Health." = "Health", 
-   "ATTBE.DurableR." = "Sustainable.R", "ATTBE.Durable." = "Sustainable", 
-   "ATTBE.EcomenR." = "Econ.R", "ATTBE.Ecomen." = "Econ",
-   "ATTBE.TechR1." = "Tech.R", "ATTBE.TechR2." = "Tech2.R"
- )
- plot_cfa_ATTBE3<-lavaanPlot(
-   model = fit_cfa_ATTBE3,
-   coefs = TRUE,
-   sig = 0.05,
-   covs = TRUE,
-   stars = c("latent","covs"),
-   labels = node_names,   # <- use labels instead of node_names
-   graph_options = list(rankdir = "TB", layout = "dot"),
-   edge_options = list(color = "grey30", penwidth = 1.5, fontsize = 10)
- )
- save_png(plot_cfa_ATTBE3, "~/recherche/DOMINOS/results/plot_cfa_ATTBE3.png", width = 1500, height=400)
- 
- # analyse epxloratoire
- 
- library(psych)
- 
- # Sélection des variables ATTBE
- vars_ATTBE <- data_complete[, c("ATTBE.EcomenR.", "ATTBE.Ecomen." , "ATTBE.BienEtreR." , "ATTBE.BienEtre." , "ATTBE.TechR1." , "ATTBE.TechR2.",
-                                 "ATTBE.HealthR." , "ATTBE.Health." , "ATTBE.DurableR." , "ATTBE.Durable.", "ATTBE.NatureR1.", "ATTBE.Nature.")]
- 
- # Test de parallélité pour estimer le nombre optimal de facteurs
- fa.parallel(vars_ATTBE, fm = "ml", fa = "fa")
- 
- 
- # Exemple avec 3 facteurs
- efa_ATTBE <- fa(vars_ATTBE, nfactors = 4, rotate = "oblimin", fm = "ml")
- 
- # Résumé clair
- print(efa_ATTBE, cut = 0.3, sort = TRUE)
- 
  ### Construction
 
- cfa_ATTBC_model2 <- '
-  ATTBC_ANTRO =~  ATTBC.EcomenR. + ATTBC.Ecomen. + ATTBC.BienEtreR. + ATTBC.BienEtre. + ATTBC.TechR. + ATTBC.Tech. + ATTBC.Ecoloc. + ATTBC.EcolocR.
-  ATTBC_BIO =~ ATTBC.OnehealthR. + ATTBC.Onehealth. + ATTBC.DurableR. + ATTBC.Durable. + ATTBC.NatR. + ATTBC.Nat.
-  ATTBC_ANTRO ~~ ATTBC_BIO
-
+ # model1
+ cfa_ATTBC_model1 <- '
+  ATTBC_ECO=~  ATTBC.EcomenR. + ATTBC.Ecomen. + ATTBC.Ecoloc. + ATTBC.EcolocR. 
+  ATTBC_CONF=~  ATTBC.BienEtreR. + ATTBC.BienEtre. + ATTBC.TechR. + ATTBC.Tech. + ATTBC.NatR. + ATTBC.Nat.
+  ATTBC_BIO =~ ATTBC.OnehealthR. + ATTBC.Onehealth. + ATTBC.DurableR. + ATTBC.Durable. 
+  ATTBC_ECO~~ATTBC_CONF
+  ATTBC_CONF~~ ATTBC_BIO
+  ATTBC_BIO ~~ATTBC_ECO
 '
- cfa_ATTBC_model2 <- cfa(cfa_ATTBC_model2, data = data_complete, std.lv = TRUE)
+ fit_cfa_ATTBC_model1 <- cfa(cfa_ATTBC_model1, data = data_complete, std.lv = TRUE)
+ lavInspect(fit_cfa_ATTBC_model1, "cov.lv") ## correlation between ATTBCNV et ATTBCECON > 1, not normal
+
+ summary(fit_cfa_ATTBC_model1, standardized=TRUE, fit.measures=TRUE)
+ 
+ plot_cfa_ATTBC_model1<-lavaanPlot(model = fit_cfa_ATTBC_model1, coefs = TRUE,sig = 0.05,covs = TRUE,stars = c("latent","covs"),
+   graph_options = list(rankdir = "TB", layout = "dot"),
+   edge_options = list(color = "grey30", penwidth = 1.5, fontsize = 10))
+ save_png(plot_cfa_ATTBC_model1, "~/recherche/DOMINOS/results/plot_cfa_ATTBC_model1.png", width = 1500, height=400)
+ 
+ # model 2
+ cfa_ATTBC_model2 <- '
+  ATTBC_TECH =~  ATTBC.EcomenR. + ATTBC.Ecomen. + ATTBC.Ecoloc. + ATTBC.EcolocR.+ ATTBC.TechR. + ATTBC.Tech.
+  ATTBC_CONF =~ ATTBC.BienEtreR. + ATTBC.BienEtre. + ATTBC.NatR. + ATTBC.Nat.
+  ATTBC_BIO =~ ATTBC.OnehealthR. + ATTBC.Onehealth. + ATTBC.DurableR. + ATTBC.Durable. 
+  ATTBC_TECH~~ATTBC_CONF
+  ATTBC_CONF~~ ATTBC_BIO
+  ATTBC_BIO ~~ATTBC_TECH
+'
+ fit_cfa_ATTBC_model2 <- cfa(cfa_ATTBC_model2, data = data_complete, std.lv = TRUE)
  lavInspect(cfa_ATTBC_model2, "cov.lv") ## correlation between ATTBCNV et ATTBCECON > 1, not normal
+ summary(fit_cfa_ATTBC_model2, standardized=TRUE, fit.measures=TRUE)
+ plot_cfa_ATTBC_model2<-lavaanPlot(model = fit_cfa_ATTBC_model2, coefs = TRUE,sig = 0.05,covs = TRUE,stars = c("latent","covs"),
+                                   graph_options = list(rankdir = "TB", layout = "dot"),
+                                   edge_options = list(color = "grey30", penwidth = 1.5, fontsize = 10))
+ save_png(plot_cfa_ATTBC_model2, "~/recherche/DOMINOS/results/plot_cfa_ATTBC_model2.png", width = 1500, height=400)
  
- summary(cfa_ATTBC_model2, standardized=TRUE, fit.measures=TRUE)
- 
- 
+
  # analyse epxloratoire
  
  library(psych)
- 
- # Sélection des variables ATTBC
  vars_ATTBC <- data_complete[, c("ATTBC.EcomenR." , "ATTBC.Ecomen." , "ATTBC.BienEtreR." , "ATTBC.BienEtre." , "ATTBC.TechR." , "ATTBC.Tech." , "ATTBC.Ecoloc." , "ATTBC.EcolocR.",
                                  "ATTBC.OnehealthR." , "ATTBC.Onehealth." , "ATTBC.DurableR." , "ATTBC.Durable." , "ATTBC.NatR." , "ATTBC.Nat.")]
- 
- 
- # Test de parallélité pour estimer le nombre optimal de facteurs
  fa.parallel(vars_ATTBC, fm = "ml", fa = "fa")
- 
- 
- # Exemple avec 3 facteurs
  efa_ATTBC <- fa(vars_ATTBC, nfactors = 3, rotate = "oblimin", fm = "ml")
- 
- # Résumé clair
  print(efa_ATTBC, cut = 0.3, sort = TRUE)
  
- ## try model2
  
- cfa_ATTBC2 <- '
-  ATTBCCONF =~   ATTBC.BienEtreR. + ATTBC.BienEtre. + ATTBC.Nat. + ATTBC.NatR.
-  ATTBCSOC =~ ATTBC.OnehealthR. + ATTBC.Onehealth. + ATTBC.DurableR. + ATTBC.Durable. + ATTBC.Ecoloc. + ATTBC.EcolocR.
-  ATTBCECON =~  ATTBC.TechR. + ATTBC.Tech. + ATTBC.EcomenR. + ATTBC.Ecomen. 
-ATTBCCONF ~~ ATTBCSOC
-ATTBCSOC  ~~ ATTBCECON
-ATTBCECON  ~~ ATTBCCONF
+ # model 3
+ cfa_ATTBC_model3 <- '
+  ATTBC_POS =~  ATTBC.Ecomen. + ATTBC.Ecoloc. + ATTBC.Tech.+ ATTBC.BienEtre.  + ATTBC.Durable.+ ATTBC.Nat.+ ATTBC.Onehealth.
+  ATTBC_NEG =~ ATTBC.BienEtreR. + ATTBC.NatR.+ ATTBC.OnehealthR.  + ATTBC.DurableR.  + ATTBC.EcomenR. + + ATTBC.EcolocR.
+  ATTBC_POS ~~ATTBC_NEG
 '
- fit_cfa_ATTBC2 <- cfa(cfa_ATTBC2, data=data_complete, std.lv=TRUE)
- lavInspect(fit_cfa_ATTBC2, "cov.lv") ## correlation between ATTBCNV et ATTBCECON > 1, not normal
- summary(fit_cfa_ATTBC2, standardized=TRUE, fit.measures=TRUE)
- 
- 
- node_names <- c(
-   "ATTBCCONF" = "Comfort",
-   "ATTBCSOC" = "Social",
-   "ATTBCECON" = "Economy",
-   "ATTBC.BienEtreR." = "WellBeing.R", "ATTBC.BienEtre." = "WellBeing", 
-   "ATTBC.NatR." = "Nature.R", "ATTBC.Nat." = "Nature", 
-   "ATTBC.OnehealthR." = "Health.R", "ATTBC.Onehealth." = "Health", 
-   "ATTBC.DurableR." = "Sustainable.R", "ATTBC.Durable." = "Sustainable", 
-   "ATTBC.EcomenR." = "Econ.R", "ATTBC.Ecomen." = "Econ",
-   "ATTBC.TechR." = "Tech.R", "ATTBC.Tech." = "Tech"
- )
- plot_cfa_ATTBC2<-lavaanPlot(
-   model = fit_cfa_ATTBC2,
-   coefs = TRUE,
-   sig = 0.05,
-   covs = TRUE,
-   stars = c("latent","covs"),
-   labels = node_names,   # <- use labels instead of node_names
-   graph_options = list(rankdir = "TB", layout = "dot"),
-   edge_options = list(color = "grey30", penwidth = 1.5, fontsize = 10)
- )
- save_png(plot_cfa_ATTBC2, "~/recherche/DOMINOS/results/plot_cfa_ATTBC2.png", width = 1500, height=400)
- 
+ fit_cfa_ATTBC_model3 <- cfa(cfa_ATTBC_model3, data = data_complete, std.lv = TRUE)
+ summary(fit_cfa_ATTBC_model3, standardized=TRUE, fit.measures=TRUE)
+ plot_cfa_ATTBC_model3<-lavaanPlot(model = fit_cfa_ATTBC_model3, coefs = TRUE,sig = 0.05,covs = TRUE,stars = c("latent","covs"),
+                                   graph_options = list(rankdir = "TB", layout = "dot"),
+                                   edge_options = list(color = "grey30", penwidth = 1.5, fontsize = 10))
+ save_png(plot_cfa_ATTBC_model3, "~/recherche/DOMINOS/results/plot_cfa_ATTBC_model3.png", width = 1500, height=400)
  
 
- 
- 
- #### Forest knowledge ####
- 
- cfa_foknow <- '
-  FOKNOW =~  ConEssence_num    +  ConSurface_num   +   ConSurface2_num  +   ConGestion_num     + ConProp_num     +    ConRecolte_num  
+ ### energy
+ cfa_ATTBE_model3 <- '
+  ATTBE_NEG =~   ATTBE.BienEtreR. + ATTBE.TechR2.+ ATTBE.NatureR1.  + ATTBE.DurableR.+ ATTBE.HealthR.+ATTBE.EcolocR. + ATTBE.EcomenR.
+  ATTBE_POS =~   ATTBE.Health. + ATTBE.Durable. + ATTBE.Nature.+ ATTBE.Ecoloc. + ATTBE.Ecomen.  + ATTBE.BienEtre. 
+  ATTBE_POS ~~ATTBE_NEG
 '
- fit_cfa_foknow <- cfa(cfa_foknow, data=data_complete, std.lv=TRUE) # low loadings
- summary(fit_cfa_foknow, standardized=TRUE, fit.measures=TRUE)
+ fit_cfa_ATTBE_model3 <- cfa(cfa_ATTBE_model3, data=data_complete, std.lv=TRUE)
+ lavInspect(fit_cfa_ATTBE_model3, "cov.lv") ## correlation between ATTBENV et ATTBEECON > 1, not normal
+ summary(fit_cfa_ATTBE_model3, standardized=TRUE, fit.measures=TRUE)
+ plot_cfa_ATTBE_model3<-lavaanPlot(model = fit_cfa_ATTBE_model3, coefs = TRUE,sig = 0.05,covs = TRUE,stars = c("latent","covs"),
+                                   graph_options = list(rankdir = "TB", layout = "dot"),
+                                   edge_options = list(color = "grey30", penwidth = 1.5, fontsize = 10))
+ save_png(plot_cfa_ATTBE_model3, "~/recherche/DOMINOS/results/plot_cfa_ATTBE_model3.png", width = 1500, height=400)
  
- vars_foknow <- data_complete[, c("ConEssence_num","ConSurface_num","ConSurface2_num","ConGestion_num","ConProp_num","ConRecolte_num")]
- alpha(vars_foknow) # very low interval consistency. We can't build an common index
-
- # treat the variable as a sum of good answers.
+ 
  
  #### perception of threat ####
  men_vars <- grep("^ATTMEN", names(data_complete), value = TRUE)
@@ -892,12 +714,6 @@ ATTBCECON  ~~ ATTBCCONF
  
  
  
-  #### proximity to forest ####
 
- prox_vars <- grep("^Prox", names(data_complete), value = TRUE)
- prox_data <- data_complete[, prox_vars]
- prox_data_num <- data.frame(lapply(prox_data, function(x) as.numeric(as.character(x))))
- cor_matrix <- cor(prox_data_num, use = "pairwise.complete.obs")
- corrplot(cor_matrix, method = "color", type = "upper", tl.cex = 0.7)
  
  
