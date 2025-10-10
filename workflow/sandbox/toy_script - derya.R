@@ -10,7 +10,7 @@ library("lavaan")
 library("lavaanPlot")
 library("DiagrammeRsvg")
 library("rsvg")
-
+library("corrplot")
 path <- "~/recherche/DOMINOS/dominos_github/resources/inhouse/results_survey857139_code.csv" # nolint
 data <- read.csv(file = path, header = TRUE, sep = ";", na.strings=c("","NA"))
 
@@ -499,7 +499,7 @@ env_vars <- grep("^ATTENV", names(data_complete), value = TRUE)
 env_data <- data_complete[, env_vars]
 env_data_num <- data.frame(lapply(env_data, function(x) as.numeric(as.character(x))))
 cor_matrix <- cor(env_data_num, use = "pairwise.complete.obs")
-library(corrplot)
+
 corrplot(cor_matrix, method = "color", type = "upper", tl.cex = 0.7)
 high_corrs <- which(abs(cor_matrix) > 0.8 & abs(cor_matrix) < 1, arr.ind = TRUE)
 cor_matrix[high_corrs]
@@ -528,10 +528,10 @@ cor_matrix <- cor(bc_data_num, use = "pairwise.complete.obs")
 corrplot(cor_matrix, method = "color", type = "upper", tl.cex = 0.7)
 high_corrs <- which(abs(cor_matrix) > 0.8 & abs(cor_matrix) < 1, arr.ind = TRUE)
 cor_matrix[high_corrs]
-# --------------------------------------------------------------------#
-#               confirmatory factor analysis                          #
-# --------------------------------------------------------------------#
-# (measurement model)
+
+#### --------------------------------------------------------------------####
+####               confirmatory factor analysis                          ####
+#### --------------------------------------------------------------------####
 
 #### ENVIRONMENTAL ATTITUDES ####
 
@@ -588,7 +588,7 @@ summary(fit_cfa_attenv, standardized=TRUE, fit.measures=TRUE)
   ATTBC_BIO ~~ATTBC_ECO
 '
  fit_cfa_ATTBC_model1 <- cfa(cfa_ATTBC_model1, data = data_complete, std.lv = TRUE)
- lavInspect(fit_cfa_ATTBC_model1, "cov.lv") ## correlation between ATTBCNV et ATTBCECON > 1, not normal
+ lavInspect(fit_cfa_ATTBC_model1, "cov.lv") #
 
  summary(fit_cfa_ATTBC_model1, standardized=TRUE, fit.measures=TRUE)
  
@@ -607,7 +607,7 @@ summary(fit_cfa_attenv, standardized=TRUE, fit.measures=TRUE)
   ATTBC_BIO ~~ATTBC_TECH
 '
  fit_cfa_ATTBC_model2 <- cfa(cfa_ATTBC_model2, data = data_complete, std.lv = TRUE)
- lavInspect(cfa_ATTBC_model2, "cov.lv") ## correlation between ATTBCNV et ATTBCECON > 1, not normal
+ lavInspect(cfa_ATTBC_model2, "cov.lv") 
  summary(fit_cfa_ATTBC_model2, standardized=TRUE, fit.measures=TRUE)
  plot_cfa_ATTBC_model2<-lavaanPlot(model = fit_cfa_ATTBC_model2, coefs = TRUE,sig = 0.05,covs = TRUE,stars = c("latent","covs"),
                                    graph_options = list(rankdir = "TB", layout = "dot"),
@@ -621,18 +621,38 @@ summary(fit_cfa_attenv, standardized=TRUE, fit.measures=TRUE)
  vars_ATTBC <- data_complete[, c("ATTBC.EcomenR." , "ATTBC.Ecomen." , "ATTBC.BienEtreR." , "ATTBC.BienEtre." , "ATTBC.TechR." , "ATTBC.Tech." , "ATTBC.Ecoloc." , "ATTBC.EcolocR.",
                                  "ATTBC.OnehealthR." , "ATTBC.Onehealth." , "ATTBC.DurableR." , "ATTBC.Durable." , "ATTBC.NatR." , "ATTBC.Nat.")]
  fa.parallel(vars_ATTBC, fm = "ml", fa = "fa")
- efa_ATTBC <- fa(vars_ATTBC, nfactors = 3, rotate = "oblimin", fm = "ml")
+ efa_ATTBC <- fa(vars_ATTBC, nfactors = 4, rotate = "oblimin", fm = "ml")
  print(efa_ATTBC, cut = 0.3, sort = TRUE)
  
+ 
+ 
+ vars_ATTBC <- data_complete[, c("ATTBC.EcomenR." , "ATTBC.Ecomen." , "ATTBC.BienEtreR." , "ATTBC.BienEtre." , "ATTBC.TechR." , "ATTBC.Tech." , "ATTBC.Ecoloc." , "ATTBC.EcolocR.", "ATTBC.Onehealth." , "ATTBC.DurableR." , "ATTBC.Durable."  , "ATTBC.Nat.")]
+ fa.parallel(vars_ATTBC, fm = "ml", fa = "fa")
+ efa_ATTBC <- fa(vars_ATTBC, nfactors = 3, rotate = "oblimin", fm = "ml")
+ print(efa_ATTBC, cut = 0.3, sort = TRUE)
  
  # model 3
  cfa_ATTBC_model3 <- '
   ATTBC_POS =~  ATTBC.Ecomen. + ATTBC.Ecoloc. + ATTBC.Tech.+ ATTBC.BienEtre.  + ATTBC.Durable.+ ATTBC.Nat.+ ATTBC.Onehealth.
-  ATTBC_NEG =~ ATTBC.BienEtreR. + ATTBC.NatR.+ ATTBC.OnehealthR.  + ATTBC.DurableR.  + ATTBC.EcomenR. + + ATTBC.EcolocR.
+  ATTBC_NEG =~ ATTBC.BienEtreR. + ATTBC.NatR.+ ATTBC.OnehealthR.  + ATTBC.DurableR.   + ATTBC.EcolocR.
   ATTBC_POS ~~ATTBC_NEG
 '
  fit_cfa_ATTBC_model3 <- cfa(cfa_ATTBC_model3, data = data_complete, std.lv = TRUE)
  summary(fit_cfa_ATTBC_model3, standardized=TRUE, fit.measures=TRUE)
+ plot_cfa_ATTBC_model3<-lavaanPlot(model = fit_cfa_ATTBC_model3, coefs = TRUE,sig = 0.05,covs = TRUE,stars = c("latent","covs"),
+                                   graph_options = list(rankdir = "TB", layout = "dot"),
+                                   edge_options = list(color = "grey30", penwidth = 1.5, fontsize = 10))
+ save_png(plot_cfa_ATTBC_model3, "~/recherche/DOMINOS/results/plot_cfa_ATTBC_model3.png", width = 1500, height=400)
+ 
+ 
+ # model 4
+ cfa_ATTBC_model4 <- '
+  ATTBC_U=~    ATTBC.Ecomen. + ATTBC.Ecoloc.  + ATTBC.BienEtre.   + ATTBC.Tech.
+  ATTBC_P =~  + ATTBC.Nat. + ATTBC.Durable.+ ATTBC.Onehealth.   
+
+'
+ fit_cfa_ATTBC_model4 <- cfa(cfa_ATTBC_model4, data = data_complete, std.lv = TRUE)
+ summary(fit_cfa_ATTBC_model4, standardized=TRUE, fit.measures=TRUE)
  plot_cfa_ATTBC_model3<-lavaanPlot(model = fit_cfa_ATTBC_model3, coefs = TRUE,sig = 0.05,covs = TRUE,stars = c("latent","covs"),
                                    graph_options = list(rankdir = "TB", layout = "dot"),
                                    edge_options = list(color = "grey30", penwidth = 1.5, fontsize = 10))
@@ -646,7 +666,7 @@ summary(fit_cfa_attenv, standardized=TRUE, fit.measures=TRUE)
   ATTBE_POS ~~ATTBE_NEG
 '
  fit_cfa_ATTBE_model3 <- cfa(cfa_ATTBE_model3, data=data_complete, std.lv=TRUE)
- lavInspect(fit_cfa_ATTBE_model3, "cov.lv") ## correlation between ATTBENV et ATTBEECON > 1, not normal
+ lavInspect(fit_cfa_ATTBE_model3, "cov.lv") 
  summary(fit_cfa_ATTBE_model3, standardized=TRUE, fit.measures=TRUE)
  plot_cfa_ATTBE_model3<-lavaanPlot(model = fit_cfa_ATTBE_model3, coefs = TRUE,sig = 0.05,covs = TRUE,stars = c("latent","covs"),
                                    graph_options = list(rankdir = "TB", layout = "dot"),
@@ -656,64 +676,102 @@ summary(fit_cfa_attenv, standardized=TRUE, fit.measures=TRUE)
  
  
  #### perception of threat ####
+ 
+ # correlation
  men_vars <- grep("^ATTMEN", names(data_complete), value = TRUE)
  men_data <- data_complete[, men_vars]
  men_data_num <- data.frame(lapply(men_data, function(x) as.numeric(as.character(x))))
  cor_matrix <- cor(men_data_num, use = "pairwise.complete.obs")
  corrplot(cor_matrix, method = "color", type = "upper", tl.cex = 0.7)
 
- 
+ # model 1
  cfa_attmen <- '
- ATTMENFU =~   ATTMENACE.CC.    +   ATTMENACE.CCR. +  ATTMENACE.NoptR. +   ATTMENACE.Nopt.    
- ATTMENGE =~ ATTMENACE.Gestion. + ATTMENACE.GestionR. + ATTMENACE.Inq. + ATTMENACE.InqR.
- ATTMENSA =~ATTMENACE.Defo. + ATTMENACE.DefoR. + ATTMENACE.Sante. + ATTMENACE.SanteR.
- ATTMENFU~~ATTMENGE
- ATTMENGE ~~ATTMENSA
- ATTMENSA~~ATTMENFU
+ ATTMEN_INQ =~  +  ATTMENACE.NoptR. +   ATTMENACE.Nopt.    + ATTMENACE.Inq. + ATTMENACE.InqR.
+ ATTMEN_EX =~ ATTMENACE.Gestion. + ATTMENACE.GestionR. + ATTMENACE.Defo. + ATTMENACE.DefoR.
+ ATTMEN_SA =~ ATTMENACE.CC.    +   ATTMENACE.CCR. + ATTMENACE.Sante. + ATTMENACE.SanteR.
+ ATTMEN_INQ~~ATTMEN_EX
+ ATTMEN_EX ~~ATTMEN_SA
+ ATTMEN_SA~~ATTMEN_INQ
  '
- fit_cfa_attmen<- cfa(cfa_attmen, data=data_complete, std.lv=TRUE) # low loadings
+ fit_cfa_attmen<- cfa(cfa_attmen, data=data_complete, std.lv=TRUE) 
  lavInspect(fit_cfa_attmen, "cov.lv")
  summary(fit_cfa_attmen, standardized=TRUE, fit.measures=TRUE)
 
- cfa_attmen2 <- '
- ATTMENCC =~   ATTMENACE.CC.    +   ATTMENACE.CCR.    
- ATTMENHU =~ ATTMENACE.Gestion. + ATTMENACE.GestionR. + ATTMENACE.Inq. + ATTMENACE.InqR. +ATTMENACE.Defo. + ATTMENACE.DefoR.
- ATTMENSA =~ ATTMENACE.Sante. + ATTMENACE.SanteR.  +  ATTMENACE.NoptR. +   ATTMENACE.Nopt. 
- ATTMENCC~~ATTMENHU
- ATTMENHU ~~ATTMENSA
- ATTMENSA~~ATTMENCC
- '
- fit_cfa_attmen2<- cfa(cfa_attmen2, data=data_complete, std.lv=TRUE) # low loadings
- lavInspect(fit_cfa_attmen2, "cov.lv")
- summary(fit_cfa_attmen2, standardized=TRUE, fit.measures=TRUE)
- 
-
-
- node_names <- c(
-   "ATTBCCONF" = "Comfort",
-   "ATTBCSOC" = "Social",
-   "ATTBCECON" = "Economy",
-   "ATTBC.BienEtreR." = "WellBeing.R", "ATTBC.BienEtre." = "WellBeing", 
-   "ATTBC.NatR." = "Nature.R", "ATTBC.Nat." = "Nature", 
-   "ATTBC.OnehealthR." = "Health.R", "ATTBC.Onehealth." = "Health", 
-   "ATTBC.DurableR." = "Sustainable.R", "ATTBC.Durable." = "Sustainable", 
-   "ATTBC.EcomenR." = "Econ.R", "ATTBC.Ecomen." = "Econ",
-   "ATTBC.TechR." = "Tech.R", "ATTBC.Tech." = "Tech"
- )
- plot_cfa_ATTBC2<-lavaanPlot(
-   model = fit_cfa_ATTBC2,
-   coefs = TRUE,
-   sig = 0.05,
-   covs = TRUE,
-   stars = c("latent","covs"),
-   labels = node_names,   # <- use labels instead of node_names
+ plot_cfa_attmen<-lavaanPlot( model = fit_cfa_attmen,   coefs = TRUE,  sig = 0.05,  covs = TRUE,   stars = c("latent","covs"),
    graph_options = list(rankdir = "TB", layout = "dot"),
-   edge_options = list(color = "grey30", penwidth = 1.5, fontsize = 10)
- )
- save_png(plot_cfa_ATTBC2, "~/recherche/DOMINOS/results/plot_cfa_ATTBC2.png", width = 1500, height=400)
+   edge_options = list(color = "grey30", penwidth = 1.5, fontsize = 10))
+ save_png(plot_cfa_attmen, "~/recherche/DOMINOS/results/plot_cfa_attmen.png", width = 1500, height=400)
+ 
+ 
+ # analyse epxloratoire
+ men_vars <- grep("^ATTMEN", names(data_complete), value = TRUE)
+ 
+ library(psych)
+ vars_ATTMEN <- data_complete[, grep("^ATTMEN", names(data_complete))]
+ fa.parallel(vars_ATTMEN, fm = "ml", fa = "fa")
+ efa_ATTMEN <- fa(vars_ATTMEN, nfactors = 3, rotate = "oblimin", fm = "ml")
+ print(efa_ATTMEN, cut = 0.3, sort = TRUE)
  
  
  
-
+ # model 2
  
+ cfa_attmen_model2 <- '
+ ATTMEN_OPTA =~ ATTMENACE.GestionR. + ATTMENACE.NoptR.  +  + ATTMENACE.SanteR. 
+ ATTMEN_OPTF=~  ATTMENACE.CCR.  +   ATTMENACE.DefoR. + ATTMENACE.InqR. 
+ ATTMEN_PESA=~ ATTMENACE.Nopt. + ATTMENACE.Gestion. + ATTMENACE.Sante.
+ ATTMEN_PESF=~    ATTMENACE.Inq. + ATTMENACE.Defo. + ATTMENACE.CC.   
+ '
+ fit_cfa_attmen_model2<- cfa(cfa_attmen_model2, data=data_complete, std.lv=TRUE) 
+ lavInspect(fit_cfa_attmen_model2, "cov.lv")
+ summary(fit_cfa_attmen_model2, standardized=TRUE, fit.measures=TRUE)
+ 
+ plot_cfa_attmen_model2<-lavaanPlot( model = fit_cfa_attmen_model2,   coefs = TRUE,  sig = 0.05,  covs = TRUE,   stars = c("latent","covs"),
+                              graph_options = list(rankdir = "TB", layout = "dot"),
+                              edge_options = list(color = "grey30", penwidth = 1.5, fontsize = 10))
+ save_png(plot_cfa_attmen_model2, "~/recherche/DOMINOS/results/plot_cfa_attmen_model2.png", width = 1000, height=500)
+ 
+ 
+ # model 3
+ 
+ cfa_attmen_model3 <- '
+ ATTMEN_OPTA =~ ATTMENACE.GestionR. + ATTMENACE.NoptR.  +  + ATTMENACE.SanteR. 
+ ATTMEN_OPTF=~  ATTMENACE.CCR.  +   ATTMENACE.DefoR. + ATTMENACE.InqR. 
+ ATTMEN_PESA=~ ATTMENACE.Nopt. + ATTMENACE.Gestion. + ATTMENACE.Sante.+ ATTMENACE.Inq. + ATTMENACE.Defo. + ATTMENACE.CC.  
+ '
+ fit_cfa_attmen_model3<- cfa(cfa_attmen_model3, data=data_complete, std.lv=TRUE) 
+ lavInspect(fit_cfa_attmen_model3, "cov.lv")
+ summary(fit_cfa_attmen_model3, standardized=TRUE, fit.measures=TRUE)
+ 
+ plot_cfa_attmen_model3<-lavaanPlot( model = fit_cfa_attmen_model3,   coefs = TRUE,  sig = 0.05,  covs = TRUE,   stars = c("latent","covs"),
+                                     graph_options = list(rankdir = "TB", layout = "dot"),
+                                     edge_options = list(color = "grey30", penwidth = 1.5, fontsize = 10))
+ save_png(plot_cfa_attmen_model3, "~/recherche/DOMINOS/results/plot_cfa_attmen_model3.png", width = 1000, height=500)
+ 
+ #### -----------------------------####
+ ####               SEM            ####
+ #### -----------------------------####
+ 
+  ### bois construction uniquement
+ 
+sem_bc_test <- '
+    # measurement model
+  ATTENVP =~ ATTENV.P1. + ATTENV.P1R. + ATTENV.P2. + ATTENV.P2R.+ ATTENV.P3.+ATTENV.P3R. + ATTENV.P6. + ATTENV.P6R. + ATTENV.P8. + ATTENV.P8R. + ATTENV.P12. + ATTENV.P12R. + ATTENV.P11.+ATTENV.P11R.
+  ATTENVU =~ ATTENV.U4. + ATTENV.U4R. + ATTENV.U5. + ATTENV.U5R. + ATTENV.U7. + ATTENV.U7R. + ATTENV.U9. + ATTENV.U9R. + ATTENV.U10. + ATTENV.U10R.
+  ATTFOP =~ ATTFO.P1. + ATTFO.P1R. + ATTFO.P2. + ATTFO.P2R. + ATTFO.P6. + ATTFO.P6R. + ATTFO.P8. + ATTFO.P8R. + ATTFO.P3. + ATTFO.P3R.
+  ATTFOU =~ ATTFO.U4. + ATTFO.U4R. + ATTFO.U5. + ATTFO.U5R. + ATTFO.U7. + ATTFO.U7R. + ATTFO.U9. + ATTFO.U9R. + ATTFO.U10. + ATTFO.U10R.
+  ATTBC_POS =~  ATTBC.Ecomen. + ATTBC.Ecoloc. + ATTBC.Tech.+ ATTBC.BienEtre.  + ATTBC.Durable.+ ATTBC.Nat.+ ATTBC.Onehealth.
+  ATTBC_NEG =~ ATTBC.BienEtreR. + ATTBC.NatR.+ ATTBC.OnehealthR.  + ATTBC.DurableR.  + ATTBC.EcomenR. + + ATTBC.EcolocR.
+  ATTMEN_OPTA =~ ATTMENACE.GestionR. + ATTMENACE.NoptR.  +  + ATTMENACE.SanteR. 
+  ATTMEN_OPTF=~  ATTMENACE.CCR.  +   ATTMENACE.DefoR. + ATTMENACE.InqR. 
+  ATTMEN_PESA=~ ATTMENACE.Nopt. + ATTMENACE.Gestion. + ATTMENACE.Sante.+ ATTMENACE.Inq. + ATTMENACE.Defo. + ATTMENACE.CC.  
+  
+    # regression 
+  ATTBC_POS ~ ATTMEN_OPTA + ATTMEN_OPTF + ATTMEN_PESA + ATTFOU  + ATTFOP+ ATTENVU  + ATTENVP
+  ATTBC_NEG ~ ATTMEN_OPTA + ATTMEN_OPTF + ATTMEN_PESA + ATTFOU  + ATTFOP+ ATTENVU  + ATTENVP
+ '
+ fit_sem_bc_test<- cfa(sem_bc_test, data=data_complete, std.lv=TRUE) 
+ lavInspect(fit_sem_bc_test, "cov.lv")
+ 
+ summary(fit_sem_bc_test, standardized=TRUE, fit.measures=TRUE)
  
