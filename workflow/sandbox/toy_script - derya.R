@@ -653,10 +653,28 @@ summary(fit_cfa_attenv, standardized=TRUE, fit.measures=TRUE)
 '
  fit_cfa_ATTBC_model4 <- cfa(cfa_ATTBC_model4, data = data_complete, std.lv = TRUE)
  summary(fit_cfa_ATTBC_model4, standardized=TRUE, fit.measures=TRUE)
- plot_cfa_ATTBC_model3<-lavaanPlot(model = fit_cfa_ATTBC_model3, coefs = TRUE,sig = 0.05,covs = TRUE,stars = c("latent","covs"),
+ plot_cfa_ATTBC_model4<-lavaanPlot(model = fit_cfa_ATTBC_model4, coefs = TRUE,sig = 0.05,covs = TRUE,stars = c("latent","covs"),
                                    graph_options = list(rankdir = "TB", layout = "dot"),
                                    edge_options = list(color = "grey30", penwidth = 1.5, fontsize = 10))
- save_png(plot_cfa_ATTBC_model3, "~/recherche/DOMINOS/results/plot_cfa_ATTBC_model3.png", width = 1500, height=400)
+ save_png(plot_cfa_ATTBC_model4, "~/recherche/DOMINOS/results/plot_cfa_ATTBC_model4.png", width = 1500, height=400)
+ 
+ vars_ATTBC <- data_complete[, c("ATTBC.Ecomen." , "ATTBC.Ecoloc." , "ATTBC.BienEtre." , "ATTBC.Tech." , "ATTBC.Nat." , "ATTBC.Durable." , "ATTBC.Onehealth." )]
+ fa.parallel(vars_ATTBC, fm = "ml", fa = "fa")
+ efa_ATTBC <- fa(vars_ATTBC, nfactors = 2, rotate = "oblimin", fm = "ml")
+ print(efa_ATTBC, cut = 0.3, sort = TRUE)
+ 
+ # model 5
+ cfa_ATTBC_model5 <- '
+  ATTBC_HUM=~    ATTBC.Ecomen. + ATTBC.Ecoloc.   + ATTBC.Tech. +ATTBC.Durable.+ ATTBC.Onehealth.   
+  ATTBC_EGO =~  + ATTBC.Nat. +  + ATTBC.BienEtre. 
+
+'
+ fit_cfa_ATTBC_model5 <- cfa(cfa_ATTBC_model5, data = data_complete, std.lv = TRUE)
+ summary(fit_cfa_ATTBC_model5, standardized=TRUE, fit.measures=TRUE)
+ plot_cfa_ATTBC_model5<-lavaanPlot(model = fit_cfa_ATTBC_model5, coefs = TRUE,sig = 0.05,covs = TRUE,stars = c("latent","covs"),
+                                   graph_options = list(rankdir = "TB", layout = "dot"),
+                                   edge_options = list(color = "grey30", penwidth = 1.5, fontsize = 10))
+ save_png(plot_cfa_ATTBC_model5, "~/recherche/DOMINOS/results/plot_cfa_ATTBC_model5.png", width = 1500, height=400)
  
 
  ### energy
@@ -673,6 +691,18 @@ summary(fit_cfa_attenv, standardized=TRUE, fit.measures=TRUE)
                                    edge_options = list(color = "grey30", penwidth = 1.5, fontsize = 10))
  save_png(plot_cfa_ATTBE_model3, "~/recherche/DOMINOS/results/plot_cfa_ATTBE_model3.png", width = 1500, height=400)
  
+ cfa_ATTBE_model4 <- '
+  ATTBE_HUM =~   ATTBE.BienEtreR. + ATTBE.TechR2.+ ATTBE.NatureR1.  + ATTBE.DurableR.+ ATTBE.HealthR.+ATTBE.EcolocR. + ATTBE.EcomenR.
+  ATTBE_EGO =~   ATTBE.Health. + ATTBE.Durable. + ATTBE.Nature.+ ATTBE.Ecoloc. + ATTBE.Ecomen.  + ATTBE.BienEtre. 
+  ATTBE_POS ~~ATTBE_NEG
+'
+ fit_cfa_ATTBE_model4 <- cfa(cfa_ATTBE_model4, data=data_complete, std.lv=TRUE)
+ lavInspect(fit_cfa_ATTBE_model4, "cov.lv") 
+ summary(fit_cfa_ATTBE_model4, standardized=TRUE, fit.measures=TRUE)
+ plot_cfa_ATTBE_model4<-lavaanPlot(model = fit_cfa_ATTBE_model4, coefs = TRUE,sig = 0.05,covs = TRUE,stars = c("latent","covs"),
+                                   graph_options = list(rankdir = "TB", layout = "dot"),
+                                   edge_options = list(color = "grey30", penwidth = 1.5, fontsize = 10))
+ save_png(plot_cfa_ATTBE_model4, "~/recherche/DOMINOS/results/plot_cfa_ATTBE_model4.png", width = 1500, height=400)
  
  
  #### perception of threat ####
