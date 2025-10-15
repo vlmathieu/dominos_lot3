@@ -678,6 +678,7 @@ summary(fit_cfa_attenv, standardized=TRUE, fit.measures=TRUE)
  
 
  ### energy
+ # model 3
  cfa_ATTBE_model3 <- '
   ATTBE_NEG =~   ATTBE.BienEtreR. + ATTBE.TechR2.+ ATTBE.NatureR1.  + ATTBE.DurableR.+ ATTBE.HealthR.+ATTBE.EcolocR. + ATTBE.EcomenR.
   ATTBE_POS =~   ATTBE.Health. + ATTBE.Durable. + ATTBE.Nature.+ ATTBE.Ecoloc. + ATTBE.Ecomen.  + ATTBE.BienEtre. 
@@ -691,11 +692,25 @@ summary(fit_cfa_attenv, standardized=TRUE, fit.measures=TRUE)
                                    edge_options = list(color = "grey30", penwidth = 1.5, fontsize = 10))
  save_png(plot_cfa_ATTBE_model3, "~/recherche/DOMINOS/results/plot_cfa_ATTBE_model3.png", width = 1500, height=400)
  
+ #EFA
+ library(psych)
+ vars_ATTBE <- data_complete[,c("ATTBE.EcomenR.","ATTBE.BienEtreR." , "ATTBE.BienEtre."  , "ATTBE.TechR1." , "ATTBE.TechR2." , "ATTBE.Nature." 
+                              , "ATTBE.HealthR."  , "ATTBE.Health." , "ATTBE.Durable." ,"ATTBE.DurableR."  , "ATTBE.Ecoloc." , "ATTBE.EcolocR." , "ATTBE.Ecomen.") ]
+ fa.parallel(vars_ATTBE, fm = "ml", fa = "fa")
+ efa_ATTBE <- fa(vars_ATTBE, nfactors = 2, rotate = "oblimin", fm = "ml")
+ print(efa_ATTBE, cut = 0.3, sort = TRUE)
+ 
+ vars_ATTBE <- data_complete[,c( "ATTBE.BienEtre."   , "ATTBE.Nature."   , "ATTBE.Health." , "ATTBE.Durable."   , "ATTBE.Ecoloc."  , "ATTBE.Ecomen.") ]
+ fa.parallel(vars_ATTBE, fm = "ml", fa = "fa")
+ efa_ATTBE <- fa(vars_ATTBE, nfactors = 2, rotate = "oblimin", fm = "ml")
+ print(efa_ATTBE, cut = 0.3, sort = TRUE)
+ 
+ # model4 
  cfa_ATTBE_model4 <- '
-  ATTBE_HUM =~   ATTBE.BienEtreR. + ATTBE.TechR2.+ ATTBE.NatureR1.  + ATTBE.DurableR.+ ATTBE.HealthR.+ATTBE.EcolocR. + ATTBE.EcomenR.
-  ATTBE_EGO =~   ATTBE.Health. + ATTBE.Durable. + ATTBE.Nature.+ ATTBE.Ecoloc. + ATTBE.Ecomen.  + ATTBE.BienEtre. 
-  ATTBE_POS ~~ATTBE_NEG
-'
+  ATTBE_EGO =~   ATTBE.EcomenR.+ATTBE.BienEtreR. + ATTBE.BienEtre.  + ATTBE.TechR1. + ATTBE.TechR2.+ ATTBE.NatureR1. + ATTBE.Nature. 
+  ATTBE_HUM =~  + ATTBE.HealthR.  + ATTBE.Health. + ATTBE.Durable. +ATTBE.DurableR.  + ATTBE.Ecoloc. + ATTBE.EcolocR. + ATTBE.Ecomen. 
+  '
+ 
  fit_cfa_ATTBE_model4 <- cfa(cfa_ATTBE_model4, data=data_complete, std.lv=TRUE)
  lavInspect(fit_cfa_ATTBE_model4, "cov.lv") 
  summary(fit_cfa_ATTBE_model4, standardized=TRUE, fit.measures=TRUE)
@@ -703,6 +718,68 @@ summary(fit_cfa_attenv, standardized=TRUE, fit.measures=TRUE)
                                    graph_options = list(rankdir = "TB", layout = "dot"),
                                    edge_options = list(color = "grey30", penwidth = 1.5, fontsize = 10))
  save_png(plot_cfa_ATTBE_model4, "~/recherche/DOMINOS/results/plot_cfa_ATTBE_model4.png", width = 1500, height=400)
+ 
+ 
+ # model5 
+ cfa_ATTBE_model5 <- '
+  ATTBE_EGO =~   ATTBE.BienEtreR. + ATTBE.BienEtre.   + ATTBE.Nature. 
+  ATTBE_HUM =~  + ATTBE.HealthR.  + ATTBE.Health. + ATTBE.Durable. +ATTBE.DurableR.  + ATTBE.Ecoloc.   
+  '
+ 
+ fit_cfa_ATTBE_model5 <- cfa(cfa_ATTBE_model5, data=data_complete, std.lv=TRUE)
+ lavInspect(fit_cfa_ATTBE_model5, "cov.lv") 
+ summary(fit_cfa_ATTBE_model5, standardized=TRUE, fit.measures=TRUE)
+ plot_cfa_ATTBE_model5<-lavaanPlot(model = fit_cfa_ATTBE_model5, coefs = TRUE,sig = 0.05,covs = TRUE,stars = c("latent","covs"),
+                                   graph_options = list(rankdir = "TB", layout = "dot"),
+                                   edge_options = list(color = "grey30", penwidth = 1.5, fontsize = 10))
+ save_png(plot_cfa_ATTBE_model5, "~/recherche/DOMINOS/results/plot_cfa_ATTBE_model5.png", width = 1500, height=400)
+ 
+ # model6
+ cfa_ATTBE_model6 <- '
+  ATTBE_EGO =~   ATTBE.BienEtre.   + ATTBE.Nature. 
+  ATTBE_HUM =~   ATTBE.Health. + ATTBE.Durable.  + ATTBE.Ecoloc.   + ATTBE.Ecomen.
+  '
+ 
+ fit_cfa_ATTBE_model6 <- cfa(cfa_ATTBE_model6, data=data_complete, std.lv=TRUE)
+ lavInspect(fit_cfa_ATTBE_model6, "cov.lv") 
+ summary(fit_cfa_ATTBE_model6, standardized=TRUE, fit.measures=TRUE)
+ plot_cfa_ATTBE_model6<-lavaanPlot(model = fit_cfa_ATTBE_model6, coefs = TRUE,sig = 0.05,covs = TRUE,stars = c("latent","covs"),
+                                   graph_options = list(rankdir = "TB", layout = "dot"),
+                                   edge_options = list(color = "grey30", penwidth = 1.5, fontsize = 10))
+ save_png(plot_cfa_ATTBE_model6, "~/recherche/DOMINOS/results/plot_cfa_ATTBE_model6.png", width = 1500, height=400)
+ 
+ 
+ ## bois energie + bois construction
+ library(psych)
+ vars_ATTB <- data_complete[, grep("^ATTB", names(data_complete), value = TRUE)]
+ fa.parallel(vars_ATTB, fm = "ml", fa = "fa")
+ efa_ATTB <- fa(vars_ATTB, nfactors = 4, rotate = "oblimin", fm = "ml")
+ print(efa_ATTB, cut = 0.3, sort = TRUE)
+ 
+ # model1
+ cfa_ATTB_model1 <- '
+  ATTB_EGO =~   ATTBE.BienEtre.   + ATTBE.Nature.  + ATTBC.Nat. +  ATTBC.BienEtre. 
+  ATTB_HUM =~   ATTBE.Health. + ATTBE.Durable.  + ATTBE.Ecoloc.   + ATTBE.Ecomen. + ATTBC.Ecomen. + ATTBC.Ecoloc.   + ATTBC.Tech. +ATTBC.Durable.+ ATTBC.Onehealth.  
+  '
+ 
+ 
+ fit_cfa_ATTB_model1 <- cfa(cfa_ATTB_model1, data=data_complete, std.lv=TRUE)
+ lavInspect(fit_cfa_ATTB_model1, "cov.lv") 
+ summary(fit_cfa_ATTB_model1, standardized=TRUE, fit.measures=TRUE)
+ plot_cfa_ATTB_model1<-lavaanPlot(model = fit_cfa_ATTB_model1, coefs = TRUE,sig = 0.05,covs = TRUE,stars = c("latent","covs"),
+                                   graph_options = list(rankdir = "TB", layout = "dot"),
+                                   edge_options = list(color = "grey30", penwidth = 1.5, fontsize = 10))
+ save_png(plot_cfa_ATTB_model1, "~/recherche/DOMINOS/results/plot_cfa_ATTB_model1.png", width = 1500, height=400)
+ 
+ # model2
+ cfa_ATTB_model2 <- '
+  ATTB_CONF =~   ATTBE.BienEtre.   + ATTBE.Nature.  + ATTBC.Nat. +  ATTBC.BienEtre. 
+  ATTB_ENV =~   ATTBE.Health. + ATTBE.Durable.   +ATTBC.Durable.+ ATTBC.Onehealth.  + ATTBE.Ecoloc.    + ATTBC.Ecoloc.
+  ATTB_ECO =~  ATTBE.Ecomen. + ATTBC.Ecomen.+ ATTBC.Tech. 
+ ' 
+ fit_cfa_ATTB_model2 <- cfa(cfa_ATTB_model2, data=data_complete, std.lv=TRUE)
+ lavInspect(fit_cfa_ATTB_model2, "cov.lv") 
+ summary(fit_cfa_ATTB_model2, standardized=TRUE, fit.measures=TRUE)
  
  
  #### perception of threat ####
