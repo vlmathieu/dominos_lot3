@@ -535,6 +535,15 @@ cor_matrix[high_corrs]
 
 #### ENVIRONMENTAL ATTITUDES ####
 
+# all together
+
+cfa_attenvtest <- '
+  ATTENV =~ ATTENV.P1. + ATTENV.P1R. + ATTENV.P2. + ATTENV.P2R.+ ATTENV.P3.+ATTENV.P3R. + ATTENV.P6. + ATTENV.P6R. + ATTENV.P8. + ATTENV.P8R. + ATTENV.P12. + ATTENV.P12R. + ATTENV.P11.+ATTENV.P11R. + ATTENV.U4. + ATTENV.U4R. + ATTENV.U5. + ATTENV.U5R. + ATTENV.U7. + ATTENV.U7R. + ATTENV.U9. + ATTENV.U9R. + ATTENV.U10. + ATTENV.U10R.
+'
+fit_cfa_attenvtest <- cfa(cfa_attenvtest, data=data_complete, std.lv=TRUE)
+summary(fit_cfa_attenvtest, standardized=TRUE, fit.measures=TRUE)
+
+
 # short cut way (marker method + std method) --> best solution 
 
 cfa_attenv <- '
@@ -816,7 +825,7 @@ summary(fit_cfa_attenv, standardized=TRUE, fit.measures=TRUE)
  library(psych)
  vars_ATTMEN <- data_complete[, grep("^ATTMEN", names(data_complete))]
  fa.parallel(vars_ATTMEN, fm = "ml", fa = "fa")
- efa_ATTMEN <- fa(vars_ATTMEN, nfactors = 3, rotate = "oblimin", fm = "ml")
+ efa_ATTMEN <- fa(vars_ATTMEN, nfactors = 4, rotate = "oblimin", fm = "ml")
  print(efa_ATTMEN, cut = 0.3, sort = TRUE)
  
  
@@ -854,6 +863,14 @@ summary(fit_cfa_attenv, standardized=TRUE, fit.measures=TRUE)
                                      graph_options = list(rankdir = "TB", layout = "dot"),
                                      edge_options = list(color = "grey30", penwidth = 1.5, fontsize = 10))
  save_png(plot_cfa_attmen_model3, "~/recherche/DOMINOS/results/plot_cfa_attmen_model3.png", width = 1000, height=500)
+ 
+ # analyse epxloratoire
+ vars_ATTMEN <- data_complete[, c("ATTMENACE.Gestion." , "ATTMENACE.Inq." ,"ATTMENACE.CC." , "ATTMENACE.Defo." , "ATTMENACE.Nopt." , "ATTMENACE.Sante." )]
+ library(psych)
+ fa.parallel(vars_ATTMEN, fm = "ml", fa = "fa")
+ efa_ATTMEN <- fa(vars_ATTMEN, nfactors = 3, rotate = "oblimin", fm = "ml")
+ print(efa_ATTMEN, cut = 0.3, sort = TRUE)
+ 
  
  #### -----------------------------####
  ####               SEM            ####
