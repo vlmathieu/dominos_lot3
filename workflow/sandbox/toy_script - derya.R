@@ -368,12 +368,14 @@ data_complete <- data_complete %>%
                                 "Tout à fait d'accord" = 5),
                          ordered = TRUE,levels = 1:5)
   ))
-table(data_complete$ATTENV.P1.,data_complete$ATTENV.P1R. )
+table(data_complete$ATTENV.P1.)
+table(data_complete$ATTENV.P1R.)
 
 data_complete <- data_complete %>%
   mutate(across(starts_with("ATTENV") & ends_with("R."),
                 ~ 6 - as.numeric(.)
   ))
+
 
 
 #### forest attitudes ####
@@ -535,35 +537,160 @@ cor_matrix[high_corrs]
 
 #### ENVIRONMENTAL ATTITUDES ####
 
-# all together
-
-cfa_attenvtest <- '
-  ATTENV =~ ATTENV.P1. + ATTENV.P1R. + ATTENV.P2. + ATTENV.P2R.+ ATTENV.P3.+ATTENV.P3R. + ATTENV.P6. + ATTENV.P6R. + ATTENV.P8. + ATTENV.P8R. + ATTENV.P12. + ATTENV.P12R. + ATTENV.P11.+ATTENV.P11R. + ATTENV.U4. + ATTENV.U4R. + ATTENV.U5. + ATTENV.U5R. + ATTENV.U7. + ATTENV.U7R. + ATTENV.U9. + ATTENV.U9R. + ATTENV.U10. + ATTENV.U10R.
-'
-fit_cfa_attenvtest <- cfa(cfa_attenvtest, data=data_complete, std.lv=TRUE)
-summary(fit_cfa_attenvtest, standardized=TRUE, fit.measures=TRUE)
 
 
-# short cut way (marker method + std method) --> best solution 
-
+# modèle à 2 facteurs
 cfa_attenv <- '
   ATTENVP =~ ATTENV.P1. + ATTENV.P1R. + ATTENV.P2. + ATTENV.P2R.+ ATTENV.P3.+ATTENV.P3R. + ATTENV.P6. + ATTENV.P6R. + ATTENV.P8. + ATTENV.P8R. + ATTENV.P12. + ATTENV.P12R. + ATTENV.P11.+ATTENV.P11R.
   ATTENVU =~ ATTENV.U4. + ATTENV.U4R. + ATTENV.U5. + ATTENV.U5R. + ATTENV.U7. + ATTENV.U7R. + ATTENV.U9. + ATTENV.U9R. + ATTENV.U10. + ATTENV.U10R.
   ATTENVP ~~ ATTENVU
 '
 fit_cfa_attenv <- cfa(cfa_attenv, data=data_complete, std.lv=TRUE)
-lavInspect(fit_cfa_attenv, "cov.lv")
-summary(fit_cfa_attenv, standardized=TRUE, fit.measures=TRUE)
+summary(fit_cfa_attenv, fit.measures=TRUE, standardized=TRUE)
+fscores <- lavPredict(fit_cfa_attenv)        # scores latents
+apply(fscores, 2, mean)               # Moyennes des facteurs
+apply(fscores, 2, sd) 
 
-
- plot_cfa_attenv<-lavaanPlot(  model = fit_cfa_attenv,  coefs = TRUE,  sig = 0.05,  covs = TRUE,  stars = c("latent","covs"),
- #labels = node_names,   # <- use labels instead of node_names
-  graph_options = list(rankdir = "TB", layout = "dot"),
-  edge_options = list(color = "grey30", penwidth = 1.5, fontsize = 10)
+plot_cfa_attenv<-lavaanPlot(  model = fit_cfa_attenv,  coefs = TRUE, sig = 0.05, covs = TRUE,stars = c("latent","covs"),
+                             #labels = node_names,   # <- use labels instead of node_names
+                             graph_options = list(rankdir = "TB", layout = "dot"),
+                             edge_options = list(color = "grey30", penwidth = 1.5, fontsize = 10)
 )
- save_png(plot_cfa_attenv, "~/recherche/DOMINOS/results/plot_cfa_attenv.png", width = 1500, height=300)
+save_png(plot_cfa_attenv, "~/recherche/DOMINOS/results/plot_cfa_attenv.png", width = 1500, height=300)
 
- 
+# modèle à 1 facteur (pour version 12 items)
+cfa_attenv_2 <- '
+  ATTENV =~ ATTENV.P1. + ATTENV.P1R. + ATTENV.P2. + ATTENV.P2R.+ ATTENV.P3.+ATTENV.P3R. + ATTENV.P6. + ATTENV.P6R. + ATTENV.P8. + ATTENV.P8R. + ATTENV.P12. + ATTENV.P12R. + ATTENV.P11.+ATTENV.P11R.+ ATTENV.U4. + ATTENV.U4R. + ATTENV.U5. + ATTENV.U5R. + ATTENV.U7. + ATTENV.U7R. + ATTENV.U9. + ATTENV.U9R. + ATTENV.U10. + ATTENV.U10R.
+'
+fit_cfa_attenv_2 <- cfa(cfa_attenv_2, data=data_complete, std.lv=TRUE)
+summary(fit_cfa_attenv_2, fit.measures=TRUE, standardized=TRUE)
+fscores <- lavPredict(fit_cfa_attenv_2)        # scores latents
+apply(fscores, 2, mean)               # Moyennes des facteurs
+apply(fscores, 2, sd) 
+plot_cfa_attenv_2<-lavaanPlot(  model = fit_cfa_attenv_2,  coefs = TRUE, sig = 0.05, covs = TRUE,stars = c("latent","covs"),
+                              #labels = node_names,   # <- use labels instead of node_names
+                              graph_options = list(rankdir = "TB", layout = "dot"),
+                              edge_options = list(color = "grey30", penwidth = 1.5, fontsize = 10)
+)
+save_png(plot_cfa_attenv_2, "~/recherche/DOMINOS/results/plot_cfa_attenv_2.png", width = 1500, height=300)
+
+# modèle à 2 facteurs avec corrélations erreurs
+cfa_attenv_3 <- '
+  ATTENVP =~ ATTENV.P1. + ATTENV.P1R. + ATTENV.P2. + ATTENV.P2R.+ ATTENV.P3.+ATTENV.P3R. + ATTENV.P6. + ATTENV.P6R. + ATTENV.P8. + ATTENV.P8R. + ATTENV.P12. + ATTENV.P12R. + ATTENV.P11.+ATTENV.P11R.
+  ATTENVU =~ ATTENV.U4. + ATTENV.U4R. + ATTENV.U5. + ATTENV.U5R. + ATTENV.U7. + ATTENV.U7R. + ATTENV.U9. + ATTENV.U9R. + ATTENV.U10. + ATTENV.U10R.
+  ATTENVP ~~ ATTENVU
+    ATTENV.P1. ~~ ATTENV.P1R.
+  ATTENV.P2. ~~ ATTENV.P2R.
+  ATTENV.P3. ~~ ATTENV.P3R.
+  ATTENV.P6. ~~ ATTENV.P6R.
+  ATTENV.P8. ~~ ATTENV.P8R.
+  ATTENV.P11. ~~ ATTENV.P11R.
+   ATTENV.P12. ~~ ATTENV.P12R.
+  ATTENV.U4. ~~ ATTENV.U4R. 
+  ATTENV.U5.  ~~ ATTENV.U5R. 
+  ATTENV.U7.  ~~ ATTENV.U7R. 
+  ATTENV.U9. ~~ ATTENV.U9R. 
+  ATTENV.U10.  ~~ ATTENV.U10R.
+  
+'
+fit_cfa_attenv_3 <- cfa(cfa_attenv_3, data=data_complete, std.lv=TRUE)
+summary(fit_cfa_attenv_3, fit.measures=TRUE, standardized=TRUE)
+plot_cfa_attenv_3<-lavaanPlot(  model = fit_cfa_attenv_3,  coefs = TRUE, sig = 0.05, covs = TRUE,stars = c("latent","covs"),
+                                #labels = node_names,   # <- use labels instead of node_names
+                                graph_options = list(rankdir = "TB", layout = "dot"),
+                                edge_options = list(color = "grey30", penwidth = 1.5, fontsize = 10)
+)
+save_png(plot_cfa_attenv_3, "~/recherche/DOMINOS/results/plot_cfa_attenv_3.png", width = 1500, height=300)
+
+# modèle à 2 facteurs avec corrélations erreurs # enlever p12
+cfa_attenv_4 <- '
+  ATTENVP =~ ATTENV.P1. + ATTENV.P1R. + ATTENV.P2. + ATTENV.P2R.+ ATTENV.P3.+ATTENV.P3R. + ATTENV.P6. + ATTENV.P6R. + ATTENV.P8. + ATTENV.P8R.  + ATTENV.P11.+ATTENV.P11R.
+  ATTENVU =~ ATTENV.U4. + ATTENV.U4R. + ATTENV.U5. + ATTENV.U5R. + ATTENV.U7. + ATTENV.U7R. + ATTENV.U9. + ATTENV.U9R. + ATTENV.U10. + ATTENV.U10R.
+  ATTENVP ~~ ATTENVU
+    ATTENV.P1. ~~ ATTENV.P1R.
+  ATTENV.P2. ~~ ATTENV.P2R.
+  ATTENV.P3. ~~ ATTENV.P3R.
+  ATTENV.P6. ~~ ATTENV.P6R.
+  ATTENV.P8. ~~ ATTENV.P8R.
+  ATTENV.P11. ~~ ATTENV.P11R.
+  ATTENV.U4. ~~ ATTENV.U4R. 
+  ATTENV.U5.  ~~ ATTENV.U5R. 
+  ATTENV.U7.  ~~ ATTENV.U7R. 
+  ATTENV.U9. ~~ ATTENV.U9R. 
+  ATTENV.U10.  ~~ ATTENV.U10R.
+  
+'
+fit_cfa_attenv_4 <- cfa(cfa_attenv_4, data=data_complete, std.lv=TRUE)
+summary(fit_cfa_attenv_4, fit.measures=TRUE, standardized=TRUE)
+plot_cfa_attenv_4<-lavaanPlot(  model = fit_cfa_attenv_4,  coefs = TRUE, sig = 0.05, covs = TRUE,stars = c("latent","covs"),
+                                #labels = node_names,   # <- use labels instead of node_names
+                                graph_options = list(rankdir = "TB", layout = "dot"),
+                                edge_options = list(color = "grey30", penwidth = 1.5, fontsize = 10)
+)
+save_png(plot_cfa_attenv_4, "~/recherche/DOMINOS/results/plot_cfa_attenv_4.png", width = 1500, height=300)
+
+
+# modèle à 2 facteurs avec corrélations erreurs # enlever P3
+cfa_attenv_5 <- '
+  ATTENVP =~ ATTENV.P1. + ATTENV.P1R. + ATTENV.P2. + ATTENV.P2R. + ATTENV.P6. + ATTENV.P6R. + ATTENV.P8. + ATTENV.P8R.  + ATTENV.P11.+ATTENV.P11R.
+  ATTENVU =~ ATTENV.U4. + ATTENV.U4R. + ATTENV.U5. + ATTENV.U5R. + ATTENV.U7. + ATTENV.U7R. + ATTENV.U9. + ATTENV.U9R. + ATTENV.U10. + ATTENV.U10R.
+  ATTENVP ~~ ATTENVU
+    ATTENV.P1. ~~ ATTENV.P1R.
+  ATTENV.P2. ~~ ATTENV.P2R.
+  ATTENV.P6. ~~ ATTENV.P6R.
+  ATTENV.P8. ~~ ATTENV.P8R.
+  ATTENV.P11. ~~ ATTENV.P11R.
+  ATTENV.U4. ~~ ATTENV.U4R. 
+  ATTENV.U5. ~~ ATTENV.U5R. 
+  ATTENV.U7.  ~~ ATTENV.U7R. 
+  ATTENV.U9. ~~ ATTENV.U9R. 
+  ATTENV.U10.  ~~ ATTENV.U10R.
+  
+'
+fit_cfa_attenv_5<- cfa(cfa_attenv_5, data=data_complete, std.lv=TRUE)
+summary(fit_cfa_attenv_5, fit.measures=TRUE, standardized=TRUE)
+plot_cfa_attenv_5<-lavaanPlot(  model = fit_cfa_attenv_5,  coefs = TRUE, sig = 0.05, covs = TRUE,stars = c("latent","covs"),
+                                #labels = node_names,   # <- use labels instead of node_names
+                                graph_options = list(rankdir = "TB", layout = "dot"),
+                                edge_options = list(color = "grey30", penwidth = 1.5, fontsize = 10)
+)
+save_png(plot_cfa_attenv_5, "~/recherche/DOMINOS/results/plot_cfa_attenv_5.png", width = 1500, height=300)
+
+# only one factor
+
+cfa_attenvtest <- '
+  ATTENV =~ ATTENV.P1. + ATTENV.P1R. + ATTENV.P2. + ATTENV.P2R. + ATTENV.P6. + ATTENV.P6R. + ATTENV.P8. + ATTENV.P8R.  + ATTENV.P11.+ATTENV.P11R. + ATTENV.U4. + ATTENV.U4R. + ATTENV.U5. + ATTENV.U5R. + ATTENV.U7. + ATTENV.U7R. + ATTENV.U9. + ATTENV.U9R. + ATTENV.U10. + ATTENV.U10R.
+   ATTENV.P1. ~~ ATTENV.P1R.
+  ATTENV.P2. ~~ ATTENV.P2R.
+  ATTENV.P3. ~~ ATTENV.P3R.
+  ATTENV.P6. ~~ ATTENV.P6R.
+  ATTENV.P8. ~~ ATTENV.P8R.
+  ATTENV.P11. ~~ ATTENV.P11R.
+   ATTENV.P12. ~~ ATTENV.P12R.
+  ATTENV.U4. ~~ ATTENV.U4R. 
+  ATTENV.U5.  ~~ ATTENV.U5R. 
+  ATTENV.U7.  ~~ ATTENV.U7R. 
+  ATTENV.U9. ~~ ATTENV.U9R. 
+  ATTENV.U10.  ~~ ATTENV.U10R.
+  
+'
+fit_cfa_attenvtest <- cfa(cfa_attenvtest, data=data_complete, std.lv=TRUE)
+summary(fit_cfa_attenvtest, standardized=TRUE, fit.measures=TRUE)
+
+
+comp_fit_env <- rbind(
+  Model = fitMeasures(fit_cfa_attenv, c("chisq","pvalue","cfi","tli","rmsea","aic","bic","srmr")),
+  Model_2 = fitMeasures(fit_cfa_attenv_2, c("chisq","pvalue","cfi","tli","rmsea","aic","bic","srmr")),
+  Model_3 = fitMeasures(fit_cfa_attenv_3, c("chisq","pvalue","cfi","tli","rmsea","aic","bic","srmr")),
+  Model_4 = fitMeasures(fit_cfa_attenv_4, c("chisq","pvalue","cfi","tli","rmsea","aic","bic","srmr")),
+  Model_5 = fitMeasures(fit_cfa_attenv_5, c("chisq","pvalue","cfi","tli","rmsea","aic","bic","srmr")),
+  Model_6 = fitMeasures(fit_cfa_attenvtest, c("chisq","pvalue","cfi","tli","rmsea","aic","bic","srmr"))
+  
+)
+
+
+
+
  #### FOREST ATTITUDES ####
  
 
