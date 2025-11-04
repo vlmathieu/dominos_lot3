@@ -844,6 +844,15 @@ plot_cfa_attenv_8<-lavaanPlot(  model = fit_cfa_attenv_8,  coefs = TRUE, sig = 0
 )
 save_png(plot_cfa_attenv_8, "~/recherche/DOMINOS/results/plot_cfa_attenv_8.png", width = 1500, height=300)
 
+envp_data <- data_complete[, c("ATTENV.P1.","ATTENV.P2.","ATTENV.P6.","ATTENV.P8.","ATTENV.P11.")]
+envp_data <- data.frame(lapply(envp_data, function(x) as.numeric(as.character(x))))
+psych::alpha(envp_data) # ENTRE 0.5 ET 0.7: acceptable mais moins bon qu'avant
+envu_data <- data_complete[, c("ATTENV.U4.","ATTENV.U5.","ATTENV.U7.","ATTENV.U9.","ATTENV.U10.")]
+envu_data <- data.frame(lapply(envu_data, function(x) as.numeric(as.character(x))))
+psych::alpha(envu_data) # ENTRE 0.5 ET 0.7: acceptable mais moins bon qu'avant
+
+
+
 ### critiques liés aux reversed items
 
 cfa_attenv_9 <- '
@@ -1067,6 +1076,12 @@ plot_cfa_attfo_8<-lavaanPlot(  model = fit_cfa_attfo_8,  coefs = TRUE, sig = 0.0
                                edge_options = list(color = "grey30", penwidth = 1.5, fontsize = 10)
 )
 save_png(plot_cfa_attfo_8, "~/recherche/DOMINOS/results/plot_cfa_attfo_8.png", width = 1500, height=300)
+fop_data <- data_complete[, c("ATTFO.P1.","ATTFO.P2.","ATTFO.P6.","ATTFO.P8.")]
+fop_data <- data.frame(lapply(fop_data, function(x) as.numeric(as.character(x))))
+psych::alpha(fop_data) # ENTRE 0.5 ET 0.7: acceptable mais moins bon qu'avant
+fou_data <- data_complete[, c("ATTFO.U4.","ATTFO.U7.","ATTFO.U9.","ATTFO.U10.")]
+fou_data <- data.frame(lapply(fou_data, function(x) as.numeric(as.character(x))))
+psych::alpha(fou_data) # ENTRE 0.5 ET 0.7: acceptable mais moins bon qu'avant
 
 # model 4 sans item reversed
 cfa_attfo_9 <- '
@@ -1250,6 +1265,9 @@ ATTBC_U~~ATTBC_P
                                    graph_options = list(rankdir = "TB", layout = "dot"),
                                    edge_options = list(color = "grey30", penwidth = 1.5, fontsize = 10))
  save_png(plot_cfa_ATTBC_model5, "~/recherche/DOMINOS/results/plot_cfa_ATTBC_model4.png", width = 1500, height=400)
+ bc_data <- data_complete[, c("ATTBC.Ecomen.","ATTBC.Ecoloc.","ATTBC.Tech.","ATTBC.Durable.", "ATTBC.Onehealth.","ATTBC.BienEtre.", "ATTBC.Nat.")]
+ bc_data <- data.frame(lapply(be_data, function(x) as.numeric(as.character(x))))
+ psych::alpha(be_data) # très bon
  
  # model 6 # techR, onehealthR et EcomenR ne loadent pas
  cfa_ATTBC_model6 <- '
@@ -1287,6 +1305,14 @@ ATTBC_U~~ATTBC_P
                                    graph_options = list(rankdir = "TB", layout = "dot"),
                                    edge_options = list(color = "grey30", penwidth = 1.5, fontsize = 10))
  save_png(plot_cfa_ATTBC_model8, "~/recherche/DOMINOS/results/plot_cfa_ATTBC_model8.png", width = 1500, height=400)
+ 
+ bchum_data <- data_complete[, c("ATTBC.Ecomen.","ATTBC.Ecoloc.","ATTBC.Tech.","ATTBC.Durable.", "ATTBC.Onehealth.")]
+ bchum_data <- data.frame(lapply(bchum_data, function(x) as.numeric(as.character(x))))
+ psych::alpha(bchum_data) # très bon
+ bcego_data <- data_complete[, c("ATTBC.Nat.","ATTBC.BienEtre.")]
+ bcego_data <- data.frame(lapply(bcego_data, function(x) as.numeric(as.character(x))))
+ psych::alpha(bcego_data) # ENTRE 0.5 ET 0.7: acceptable 
+ 
  
  # model 9
  cfa_ATTBC_model9 <- '
@@ -1329,6 +1355,12 @@ ATTBC_U~~ATTBC_P
                                    edge_options = list(color = "grey30", penwidth = 1.5, fontsize = 10))
  save_png(plot_cfa_ATTBE_model1, "~/recherche/DOMINOS/results/plot_cfa_ATTBE_model1.png", width = 1500, height=400)
  
+ behum_data <- data_complete[, c("ATTBE.Ecomen.","ATTBE.Ecoloc.","ATTBE.Durable.", "ATTBE.Health.")]
+ behum_data <- data.frame(lapply(behum_data, function(x) as.numeric(as.character(x))))
+ psych::alpha(behum_data) # très bon
+ beego_data <- data_complete[, c("ATTBE.Nature.","ATTBE.BienEtre.")]
+ beego_data <- data.frame(lapply(beego_data, function(x) as.numeric(as.character(x))))
+ psych::alpha(beego_data) # ENTRE 0.5 ET 0.7: acceptable 
  
  
  # ONE FACTOR MODEL
@@ -1342,6 +1374,10 @@ ATTBC_U~~ATTBC_P
                                    graph_options = list(rankdir = "TB", layout = "dot"),
                                    edge_options = list(color = "grey30", penwidth = 1.5, fontsize = 10))
  save_png(plot_cfa_ATTBE_model2, "~/recherche/DOMINOS/results/plot_cfa_ATTBE_model2.png", width = 1500, height=400)
+ be_data <- data_complete[, c("ATTBE.Ecomen.","ATTBE.Ecoloc.","ATTBE.Durable.", "ATTBE.Health.","ATTBE.BienEtre.", "ATTBE.Nature.")]
+ be_data <- data.frame(lapply(be_data, function(x) as.numeric(as.character(x))))
+ psych::alpha(be_data) # très bon
+ 
  
  comp_fit_be <- rbind(
    Model_1 = fitMeasures(fit_cfa_ATTBE_model1, c("chisq.scaled","cfi.robust","tli.robust","rmsea.robust","srmr")),
@@ -1529,7 +1565,7 @@ ATTMEN_san ~~ATTMEN_fut
  #### OVERALL MEASUREMENT MODEL ####
  
  cfa_1_bc <- '
-  ATTENVP =~ ATTENV.P1.  + ATTENV.P2.  + ATTENV.P6.  + ATTENV.P8.   + ATTENV.P11.
+  ATTENVP =~ ATTENV.P1.  + ATTENV.P2.  + ATTENV.P6.  + ATTENV.P8.   
   ATTENVU =~ ATTENV.U4.  + ATTENV.U5.  + ATTENV.U7.  + ATTENV.U9.  + ATTENV.U10. 
   ATTENVP ~~ ATTENVU
   
@@ -1537,10 +1573,10 @@ ATTMEN_san ~~ATTMEN_fut
   ATTFOU =~ ATTFO.U4.  + ATTFO.U7.  + ATTFO.U9.  + ATTFO.U10. 
   ATTFOP ~~ ATTFOU
   
-  ATTBC_HUM=~    ATTBC.Ecomen. + ATTBC.Ecoloc.   + ATTBC.Tech. +ATTBC.Durable.+ ATTBC.Onehealth.   
-  ATTBC_EGO =~  ATTBC.Nat.  + ATTBC.BienEtre. 
-  
-  
+  ATTBC=~    ATTBC.Ecomen. + ATTBC.Ecoloc.   + ATTBC.Tech. +ATTBC.Durable.+ ATTBC.Onehealth.  +  ATTBC.Nat.  + ATTBC.BienEtre.  
+
+    ATTBE=~    ATTBE.Ecomen. + ATTBE.Ecoloc.    +ATTBE.Durable.+ ATTBE.Health.  +  ATTBE.Nature.  + ATTBE.BienEtre.  
+
   ATTMEN =~  ATTMENACE.Sante.  +  ATTMENACE.Gestion.   + ATTMENACE.Defo. + ATTMENACE.Nopt.  +  ATTMENACE.CC.   + ATTMENACE.Inq. 
 
 '
@@ -1570,7 +1606,7 @@ ATTMEN_san ~~ATTMEN_fut
  lavInspect(fit_cfa_1_bc, "cov.lv") 
  
  
- ### with forest attitudes only
+ ### with forest attitudes only # best
  
  cfa_1_bc <- '
   
@@ -1578,10 +1614,10 @@ ATTMEN_san ~~ATTMEN_fut
   ATTFOU =~ ATTFO.U4.  + ATTFO.U7.  + ATTFO.U9.  + ATTFO.U10. 
   ATTFOP ~~ ATTFOU
   
-  ATTBC_HUM=~    ATTBC.Ecomen. + ATTBC.Ecoloc.   + ATTBC.Tech. +ATTBC.Durable.+ ATTBC.Onehealth.   
-  ATTBC_EGO =~  ATTBC.Nat.  + ATTBC.BienEtre. 
-  
-  
+  ATTBC=~    ATTBC.Ecomen. + ATTBC.Ecoloc.   + ATTBC.Tech. +ATTBC.Durable.+ ATTBC.Onehealth.  +  ATTBC.Nat.  + ATTBC.BienEtre.  
+
+  ATTBE=~    ATTBE.Ecomen. + ATTBE.Ecoloc.    +ATTBE.Durable.+ ATTBE.Health.  +  ATTBE.Nature.  + ATTBE.BienEtre.  
+
   ATTMEN =~  ATTMENACE.Sante.  +  ATTMENACE.Gestion.   + ATTMENACE.Defo. + ATTMENACE.Nopt.  +  ATTMENACE.CC.   + ATTMENACE.Inq. 
 
 '
