@@ -1236,8 +1236,16 @@ kable(comp_fit_fo, format = "latex", booktabs = TRUE,
 
  #### WOOD ATTITUDES ####
 
+# modele exploratoire avec attitudes positives
+library(psych)
+bc_data <- data_complete[, c("ATTBC.Ecomen.","ATTBC.Ecoloc.","ATTBC.BienEtre.","ATTBC.Nat.","ATTBC.Onehealth.","ATTBC.Durable.")]
+poly_corr <- polychoric(bc_data)$rho
+efa_ATTBC <- fa(poly_corr, nfactors = 2, rotate = "oblimin", fm = "uls")
+summary(efa_ATTBC, digits = 3)
+print(efa_ATTBC, digits = 3)
 
- # model1
+
+# model1
  cfa_ATTBC_model1 <- '
   ATTBC_ECO =~  ATTBC.EcomenR. + ATTBC.Ecomen. + ATTBC.Ecoloc. + ATTBC.EcolocR. 
   ATTBC_CONF =~  ATTBC.BienEtreR. + ATTBC.BienEtre. + ATTBC.TechR. + ATTBC.Tech. + ATTBC.NatR. + ATTBC.Nat.
@@ -1451,6 +1459,14 @@ ATTBC_U~~ATTBC_P
  
  ### energy
  
+ # modele exploratoire avec attitudes positives
+ library(psych)
+ be_data <- data_complete[, c("ATTBE.Ecomen.","ATTBE.Ecoloc.","ATTBE.BienEtre.","ATTBE.Nature.","ATTBE.Health.","ATTBE.Durable.")]
+ poly_corr <- polychoric(be_data)$rho
+ efa_ATTBE <- fa(poly_corr, nfactors = 3, rotate = "oblimin", fm = "uls")
+ summary(efa_ATTBE, digits = 3)
+ print(efa_ATTBE, digits = 3)
+ 
  # model1 : on s'inspire de model8 attBC
  cfa_ATTBE_model1 <- '
   ATTBE_EGO =~   ATTBE.BienEtre.   + ATTBE.Nature. 
@@ -1567,10 +1583,17 @@ ATTBC_U~~ATTBC_P
                                   edge_options = list(color = "grey30", penwidth = 1.5, fontsize = 10))
  save_png(plot_cfa_ATTB_model2, "~/recherche/DOMINOS/results/plot_cfa_ATTB_model2.png", width = 1500, height=400)
  
- #### proximity to the forest sector ####
- 
- 
+
  #### perception of threat ####
+ 
+ # analyse exploratoire
+ men_data <- data_complete[, c("ATTMENACE.Nopt.","ATTMENACE.Inq.","ATTMENACE.Gestion.","ATTMENACE.Defo.","ATTMENACE.CC.","ATTMENACE.Sante.")]
+ poly_corr <- polychoric(men_data)$rho
+ efa_ATTMEN <- fa(poly_corr, nfactors = 2, rotate = "oblimin", fm = "uls")
+ summary(efa_ATTMEN, digits = 3)
+ print(efa_ATTMEN, digits = 3)
+ 
+ 
  
  # correlation
  men_vars <- grep("^ATTMEN", names(data_complete), value = TRUE)
@@ -1595,8 +1618,7 @@ ATTBC_U~~ATTBC_P
  plot_cfa_attmen_model1<-lavaanPlot( model = fit_cfa_attmen_model1,   coefs = TRUE,  sig = 0.05,  covs = TRUE,   stars = c("latent","covs"),
    graph_options = list(rankdir = "TB", layout = "dot"),
    edge_options = list(color = "grey30", penwidth = 1.5, fontsize = 10))
- save_png(plot_cfa_attmen_model1, "~/recherche/DOMINOS/results/plot_cfa_attmen_model1.png", width = 1500, height=400)
- 
+
  
 # model 2 valentin
  cfa_attmen_model2 <- '
@@ -1653,11 +1675,7 @@ ATTBC_U~~ATTBC_P
  lavInspect(fit_cfa_attmen_model4, "cov.lv")
  summary(fit_cfa_attmen_model4, standardized=TRUE, fit.measures=TRUE)
  
-# plot_cfa_attmen_model4<-lavaanPlot( model = fit_cfa_attmen_model4,   coefs = TRUE,  sig = 0.05,  covs = TRUE,   stars = c("latent","covs"),
- #                                     graph_options = list(rankdir = "TB", layout = "dot"),
- #                                   edge_options = list(color = "grey30", penwidth = 1.5, fontsize = 10))
- #save_png(plot_cfa_attmen_model4, "~/recherche/DOMINOS/results/plot_cfa_attmen_model4.png", width = 1500, height=400)
- 
+
  # one factor model
  cfa_attmen_model5 <- '
  ATTMEN_SAN =~  ATTMENACE.Sante. + ATTMENACE.SanteR. +  ATTMENACE.Gestion. + ATTMENACE.GestionR.  + ATTMENACE.Defo. + ATTMENACE.DefoR.+ ATTMENACE.NoptR. +   ATTMENACE.Nopt.  +  ATTMENACE.CC.    +   ATTMENACE.CCR. + ATTMENACE.Inq. + ATTMENACE.InqR.
@@ -1704,6 +1722,31 @@ ATTMEN_san ~~ATTMEN_fut
                                      edge_options = list(color = "grey30", penwidth = 1.5, fontsize = 10))
  save_png(plot_cfa_attmen_model7, "~/recherche/DOMINOS/results/plot_cfa_attmen_model7.png", width = 1500, height=400)
  
+ # model 8
+ 
+ cfa_attmen_model8 <- '
+ ATTMEN_THREAT =~  ATTMENACE.Gestion.   + ATTMENACE.Defo.  +  ATTMENACE.CC.   + ATTMENACE.Inq. 
+ ATTMEN_HEALTH =~  ATTMENACE.Sante. + ATTMENACE.Nopt. 
+ '
+ fit_cfa_attmen_model8<- cfa(cfa_attmen_model8, data=data_complete, std.lv=TRUE) 
+ summary(fit_cfa_attmen_model8, standardized=TRUE, fit.measures=TRUE)
+ 
+ plot_cfa_attmen_model8<-lavaanPlot( model = fit_cfa_attmen_model8,   coefs = TRUE,  sig = 0.05,  covs = TRUE,   stars = c("latent","covs"),
+                                     graph_options = list(rankdir = "TB", layout = "dot"),
+                                     edge_options = list(color = "grey30", penwidth = 1.5, fontsize = 10))
+ save_png(plot_cfa_attmen_model8, "~/recherche/DOMINOS/results/plot_cfa_attmen_model7.png", width = 1500, height=400)
+ 
+ # alpha
+ 
+men_data <- data_complete[, c("ATTMENACE.Gestion.","ATTMENACE.Defo.","ATTMENACE.CC.","ATTMENACE.Inq.", "ATTMENACE.Sante.", "ATTMENACE.Nopt.")]
+men_data <- data.frame(lapply(men_data, function(x) as.numeric(as.character(x))))
+ psych::alpha(men_data) # très bon
+ men_data <- data_complete[, c("ATTMENACE.Sante.", "ATTMENACE.Nopt." )]
+ men_data <- data.frame(lapply(men_data, function(x) as.numeric(as.character(x))))
+ psych::alpha(men_data) # très bon
+ 
+ # table
+ 
  comp_fit_attmen <- rbind(
    Model_1 = fitMeasures(fit_cfa_attmen_model1, c("chisq.scaled","cfi.robust","tli.robust","rmsea.robust","srmr")),
    Model_2 = fitMeasures(fit_cfa_attmen_model2, c("chisq.scaled","cfi.robust","tli.robust","rmsea.robust","srmr")),
@@ -1711,7 +1754,16 @@ ATTMEN_san ~~ATTMEN_fut
    Model_4 = fitMeasures(fit_cfa_attmen_model4, c("chisq.scaled","cfi.robust","tli.robust","rmsea.robust","srmr")),
    Model_5 = fitMeasures(fit_cfa_attmen_model5, c("chisq.scaled","cfi.robust","tli.robust","rmsea.robust","srmr")),
    Model_6 = fitMeasures(fit_cfa_attmen_model6, c("chisq.scaled","cfi.robust","tli.robust","rmsea.robust","srmr")),
-   Model_7 = fitMeasures(fit_cfa_attmen_model7, c("chisq.scaled","cfi.robust","tli.robust","rmsea.robust","srmr")) ) 
+   Model_7 = fitMeasures(fit_cfa_attmen_model7, c("chisq.scaled","cfi.robust","tli.robust","rmsea.robust","srmr")),
+   Model_8 = fitMeasures(fit_cfa_attmen_model8, c("chisq.scaled","cfi.robust","tli.robust","rmsea.robust","srmr")) ) 
+ 
+ # latex table
+ comp_fit_attmen <- round(comp_fit_attmen, 3)
+ 
+ kable(comp_fit_attmen, format = "latex", booktabs = TRUE,
+       caption = "Model fit comparison for ATTMEN CFA models",
+       align = "c") %>%
+   kable_styling(latex_options = c("hold_position", "scale_down"))
  
  
  
@@ -1893,35 +1945,44 @@ ATTMEN_san ~~ATTMEN_fut
  ####               SEM            ####
  #### -----------------------------####
  
-  ### bois construction uniquement
+  ### model1
 
  sem_1 <- '
   # measurement model
-  ATTENVP =~ ATTENV.P1. + ATTENV.P2. + ATTENV.P6. + ATTENV.P8. +ATTENV.P11.
-  ATTENVU =~ ATTENV.U4. + ATTENV.U5. + ATTENV.U7. + ATTENV.U9. + ATTENV.U10.
+  ATTFOP =~ ATTFO.P1. + ATTFO.P2. + ATTFO.P6. + ATTFO.P8.  
+  ATTFOU =~ ATTFO.U4. + ATTFO.U5. + ATTFO.U7. + ATTFO.U9. + ATTFO.U10. 
+  ATTFOP ~~ ATTFOU
 
-  ATTBE_HUM =~ ATTBE.Health. + ATTBE.Durable. + ATTBE.Ecoloc. + ATTBE.Ecomen.
-  ATTBE_EGO =~ ATTBE.BienEtre. + ATTBE.Nature.
+  ATTBC_ECO =~ ATTBC.Ecomen. + ATTBC.Ecoloc. 
+  ATTBC_CONF =~ ATTBC.BienEtre. + ATTBC.Nat.
+  ATTBC_BIO =~ ATTBC.Onehealth. + ATTBC.Durable. 
+  ATTBC_ECO ~~ ATTBC_CONF
+  ATTBC_CONF ~~ ATTBC_BIO
+  ATTBC_BIO ~~ ATTBC_ECO
 
-  ATTBC_HUM =~ ATTBC.Ecomen. + ATTBC.Ecoloc. + ATTBC.Tech. + ATTBC.Durable. + ATTBC.Onehealth.
-  ATTBC_EGO =~ ATTBC.Nat. + ATTBC.BienEtre.
+  ATTBE_ECO =~ ATTBE.Ecomen. + ATTBE.Ecoloc. 
+  ATTBE_CONF =~ ATTBE.BienEtre. + ATTBE.Nature.
+  ATTBE_BIO =~ ATTBE.Health. + ATTBE.Durable. 
+  ATTBE_ECO ~~ ATTBE_CONF
+  ATTBE_CONF ~~ ATTBE_BIO
+  ATTBE_BIO ~~ ATTBE_ECO
+  
+  ATTMEN_THREAT =~ ATTMENACE.Gestion. + ATTMENACE.Defo. + ATTMENACE.CC. + ATTMENACE.Inq. 
+  ATTMEN_HEALTH =~ ATTMENACE.Sante. + ATTMENACE.Nopt. 
+  ATTMEN_THREAT ~~ ATTMEN_HEALTH
 
-  ATTMEN =~ ATTMENACE.Sante. + ATTMENACE.Gestion. + ATTMENACE.Defo. +
-            ATTMENACE.Nopt. + ATTMENACE.CC. + ATTMENACE.Inq.
+  # structural relationships
+  ATTFOP ~ ATTMEN_HEALTH + ATTMEN_THREAT
+  ATTFOU ~ ATTMEN_HEALTH + ATTMEN_THREAT 
+  
+  ATTBE_ECO ~ ATTFOP + ATTFOU + ATTMEN_HEALTH + ATTMEN_THREAT
+  ATTBE_CONF ~ ATTFOP + ATTFOU + ATTMEN_HEALTH + ATTMEN_THREAT
+  ATTBE_BIO ~ ATTFOP + ATTFOU + ATTMEN_HEALTH + ATTMEN_THREAT
 
-  # structural regressions
-  ATTBE_HUM ~ ATTENVP + ATTENVU + ATTMEN
-  ATTBE_EGO ~ ATTENVP + ATTENVU + ATTMEN
-  ATTBC_HUM ~ ATTENVP + ATTENVU + ATTMEN
-  ATTBC_EGO ~ ATTENVP + ATTENVU + ATTMEN
-
-  # latent correlations
-  ATTENVP ~~ ATTENVU
-  ATTBE_HUM ~~ ATTBE_EGO
-  ATTBC_HUM ~~ ATTBC_EGO
-
+  ATTBC_ECO ~ ATTFOP + ATTFOU + ATTMEN_HEALTH + ATTMEN_THREAT
+  ATTBC_CONF ~ ATTFOP + ATTFOU + ATTMEN_HEALTH + ATTMEN_THREAT
+  ATTBC_BIO ~ ATTFOP + ATTFOU + ATTMEN_HEALTH + ATTMEN_THREAT
 '
- 
  
  
  
@@ -1931,78 +1992,204 @@ ATTMEN_san ~~ATTMEN_fut
  lavInspect(fit_sem_1, "cov.lv")
  
  summary(fit_sem_1, standardized=TRUE, fit.measures=TRUE)
+ tab <- parameterEstimates(fit_sem_1, standardized = TRUE)
+ struct_tab <- tab[tab$op == "~", ]
+ struct_tab2 <- struct_tab[, c("lhs","rhs","std.all","se","pvalue")]
+ names(struct_tab2) <- c("Outcome","Predictor","Beta","SE","p")
+  struct_tab2[, c("Beta","SE","p")] <- round(struct_tab2[, c("Beta","SE","p")], 3)
 
- plot_sem_1 <- lavaanPlot(
+  library(tidySEM)
+  library(ggplot2)
+  
+ print(xtable(struct_tab2), type = "latex")
+ 
+ ## graph
+ graph_sem(
    model = fit_sem_1,
-   coefs = TRUE,
-   sig = 0.05,
-   covs = TRUE,
-   stars = c("latent"),
-   graph_options = list(rankdir = "TB", layout = "dot"),
-   node_options = list(shape = "box", fontsize = 12, color = "lightblue", style = "filled"),
-   #latent_options = list(shape = "ellipse", color = "lightgreen", fontsize = 12, style = "filled"),
-   edge_options = list(color = "grey30", penwidth = 1.5, fontsize = 10)
- ) 
- save_png(plot_sem_test, "~/recherche/DOMINOS/results/plot_sem_test.png", width = 1500, height=400)
- 
- 
- ##### ajout des attitudes forestières
- 
+   latents = FALSE,          # show only latent variables
+   manifests = FALSE,       # hide indicators
+   load = FALSE,            # hide measurement arrows
+   regress = TRUE,          # keep regressions among latents
+   covs = TRUE              # keep latent covariances if needed
+ )
+
+
+
+ ## model2
  
  sem_2 <- '
   # measurement model
+  ATTFOP =~ ATTFO.P1. + ATTFO.P2. + ATTFO.P6. + ATTFO.P8.  
+  ATTFOU =~ ATTFO.U4. + ATTFO.U5. + ATTFO.U7. + ATTFO.U9. + ATTFO.U10. 
+  ATTFOP ~~ ATTFOU
 
-  ATTFOP =~ ATTFO.P1.  + ATTFO.P2. + ATTFO.P6.  + ATTFO.P8.  
-  ATTFOU =~ ATTFO.U4.  + ATTFO.U7.  + ATTFO.U9.  + ATTFO.U10. 
-
-  ATTBE_HUM =~ ATTBE.Health. + ATTBE.Durable. + ATTBE.Ecoloc. + ATTBE.Ecomen.
-  ATTBE_EGO =~ ATTBE.BienEtre. + ATTBE.Nature.
-
-  ATTBC_HUM =~ ATTBC.Ecomen. + ATTBC.Ecoloc. + ATTBC.Tech. + ATTBC.Durable. + ATTBC.Onehealth.
-  ATTBC_EGO =~ ATTBC.Nat. + ATTBC.BienEtre.
-
-  ATTMEN =~ ATTMENACE.Sante. + ATTMENACE.Gestion. + ATTMENACE.Defo. +
-            ATTMENACE.Nopt. + ATTMENACE.CC. + ATTMENACE.Inq.
-
-  # structural regressions
-  ATTBE_HUM ~ ATTFOP+ATTFOU+ ATTMEN
-  ATTBE_EGO ~ ATTFOP+ATTFOU+ ATTMEN
-  ATTBC_HUM ~  ATTFOP+ATTFOU+ ATTMEN
-  ATTBC_EGO ~  ATTFOP+ATTFOU+ ATTMEN
-
-  # latent correlations
- 
-    ATTFOP ~~ ATTFOU
-
-  ATTBE_HUM ~~ ATTBE_EGO
+  ATTBC_HUM=~    ATTBC.Ecomen. + ATTBC.Ecoloc.   + ATTBC.Tech. +ATTBC.Durable.+ ATTBC.Onehealth.   
+  ATTBC_EGO =~  ATTBC.Nat.  + ATTBC.BienEtre. 
   ATTBC_HUM ~~ ATTBC_EGO
 
+  ATTBE_HUM=~    ATTBE.Ecomen. + ATTBE.Ecoloc. +ATTBE.Durable.+ ATTBE.Health.   
+  ATTBE_EGO =~  ATTBE.Nature.  + ATTBE.BienEtre. 
+  ATTBE_HUM ~~ ATTBE_EGO
+  
+  ATTMEN_THREAT =~ ATTMENACE.Gestion. + ATTMENACE.Defo. + ATTMENACE.CC. + ATTMENACE.Inq. 
+  ATTMEN_HEALTH =~ ATTMENACE.Sante. + ATTMENACE.Nopt. 
+  ATTMEN_THREAT ~~ ATTMEN_HEALTH
+
+  # structural relationships
+  ATTFOP ~ ATTMEN_HEALTH + ATTMEN_THREAT
+  ATTFOU ~ ATTMEN_HEALTH + ATTMEN_THREAT 
+  
+  ATTBC_HUM ~ ATTFOP + ATTFOU + ATTMEN_HEALTH + ATTMEN_THREAT
+  ATTBC_EGO ~ ATTFOP + ATTFOU + ATTMEN_HEALTH + ATTMEN_THREAT
+
+  ATTBE_HUM ~ ATTFOP + ATTFOU + ATTMEN_HEALTH + ATTMEN_THREAT
+  ATTBE_EGO ~ ATTFOP + ATTFOU + ATTMEN_HEALTH + ATTMEN_THREAT
 '
  
  
  
- 
- fit_sem_2<- sem(sem_2, data=data_complete, std.lv=TRUE)
- 
- 
- lavInspect(fit_sem_2, "cov.lv")
+ fit_sem_2 <- sem(sem_2, data=data_complete, std.lv=TRUE)
  
  summary(fit_sem_2, standardized=TRUE, fit.measures=TRUE)
+ tab <- parameterEstimates(fit_sem_2, standardized = TRUE)
+ struct_tab <- tab[tab$op == "~", ]
+ struct_tab2 <- struct_tab[, c("lhs","rhs","std.all","se","pvalue")]
+ names(struct_tab2) <- c("Outcome","Predictor","Beta","SE","p")
+ struct_tab2[, c("Beta","SE","p")] <- round(struct_tab2[, c("Beta","SE","p")], 3)
+
+ print(xtable(struct_tab2), type = "latex")
  
- plot_sem_2 <- lavaanPlot(
+ ## graph
+test<- graph_sem(
    model = fit_sem_2,
-   coefs = TRUE,
-   sig = 0.05,
-   covs = TRUE,
-   stars = c("latent"),
-   graph_options = list(rankdir = "LR", layout = "dot"),
-   node_options = list(shape = "box", fontsize = 12, color = "lightblue", style = "filled"),
-   #latent_options = list(shape = "ellipse", color = "lightgreen", fontsize = 12, style = "filled"),
-   edge_options = list(color = "grey30", penwidth = 1.5, fontsize = 10)
- ) 
- save_png(plot_sem_2, "~/recherche/DOMINOS/results/plot_sem_2.png", width = 1500, height=400)
- comp_fit <- rbind(
-   Model_1 = fitMeasures(fit_sem_1, c("chisq.scaled","cfi.robust","tli.robust","rmsea.robust","srmr")),
-   Model_2 = fitMeasures(fit_sem_2, c("chisq.scaled","cfi.robust","tli.robust","rmsea.robust","srmr")))
-   
+   latents = FALSE,          # show only latent variables
+   manifests = FALSE,       # hide indicators
+   load = FALSE,            # hide measurement arrows
+   regress = TRUE,          # keep regressions among latents
+   covs = TRUE              # keep latent covariances if needed
+ )
  
+save_png(test, "~/recherche/DOMINOS/results/test.png", width = 3000, height=300)
+svg <- export_svg(test) 
+rsvg_pdf(charToRaw(svg),
+         file = "~/recherche/DOMINOS/results/test.pdf") 
+ 
+
+# model 3
+
+sem_3 <- '
+  # measurement model
+  ATTFOP =~ ATTFO.P1. + ATTFO.P2. + ATTFO.P6. + ATTFO.P8.  
+  ATTFOU =~ ATTFO.U4. + ATTFO.U5. + ATTFO.U7. + ATTFO.U9. + ATTFO.U10. 
+  ATTFOP ~~ ATTFOU
+
+  ATTBE_HUM=~    ATTBE.Ecomen. + ATTBE.Ecoloc. +ATTBE.Durable.+ ATTBE.Health.   
+  ATTBE_EGO =~  ATTBE.Nature.  + ATTBE.BienEtre. 
+  ATTBE_HUM ~~ ATTBE_EGO
+  
+  ATTMEN_THREAT =~ ATTMENACE.Gestion. + ATTMENACE.Defo. + ATTMENACE.CC. + ATTMENACE.Inq. 
+  ATTMEN_HEALTH =~ ATTMENACE.Sante. + ATTMENACE.Nopt. 
+  ATTMEN_THREAT ~~ ATTMEN_HEALTH
+
+  # structural relationships
+  ATTFOP ~ ATTMEN_HEALTH + ATTMEN_THREAT
+  ATTFOU ~ ATTMEN_HEALTH + ATTMEN_THREAT 
+
+  ATTBE_HUM ~ ATTFOP + ATTFOU + ATTMEN_HEALTH + ATTMEN_THREAT
+  ATTBE_EGO ~ ATTFOP + ATTFOU + ATTMEN_HEALTH + ATTMEN_THREAT
+'
+
+
+
+fit_sem_3 <- sem(sem_3, data=data_complete, std.lv=TRUE)
+
+summary(fit_sem_3, standardized=TRUE, fit.measures=TRUE)
+
+graph_sem(
+  model = fit_sem_3,
+  latents = FALSE,          # show only latent variables
+  manifests = FALSE,       # hide indicators
+  load = FALSE,            # hide measurement arrows
+  regress = TRUE,          # keep regressions among latents
+  covs = TRUE              # keep latent covariances if needed
+)
+
+tab <- parameterEstimates(fit_sem_3, standardized = TRUE)
+struct_tab <- tab[tab$op == "~", ]
+struct_tab2 <- struct_tab[, c("lhs","rhs","std.all","se","pvalue")]
+names(struct_tab2) <- c("Outcome","Predictor","Beta","SE","p")
+struct_tab2[, c("Beta","SE","p")] <- round(struct_tab2[, c("Beta","SE","p")], 3)
+
+print(xtable(struct_tab2), type = "latex")
+ 
+# model 4
+
+sem_4 <- '
+  # measurement model
+  ATTENVP =~ ATTENV.P1.  + ATTENV.P2.  + ATTENV.P6.  + ATTENV.P8.   + ATTENV.P11.
+  ATTENVU =~ ATTENV.U4.  + ATTENV.U5.  + ATTENV.U7.  + ATTENV.U9.  + ATTENV.U10. 
+  ATTENVP ~~ ATTENVU
+
+  ATTBC_HUM=~    ATTBC.Ecomen. + ATTBC.Ecoloc.   + ATTBC.Tech. +ATTBC.Durable.+ ATTBC.Onehealth.   
+  ATTBC_EGO =~  ATTBC.Nat.  + ATTBC.BienEtre. 
+  ATTBC_HUM ~~ ATTBC_EGO
+
+  ATTBE_HUM=~    ATTBE.Ecomen. + ATTBE.Ecoloc. +ATTBE.Durable.+ ATTBE.Health.   
+  ATTBE_EGO =~  ATTBE.Nature.  + ATTBE.BienEtre. 
+  ATTBE_HUM ~~ ATTBE_EGO
+  
+  ATTMEN_THREAT =~ ATTMENACE.Gestion. + ATTMENACE.Defo. + ATTMENACE.CC. + ATTMENACE.Inq. 
+  ATTMEN_HEALTH =~ ATTMENACE.Sante. + ATTMENACE.Nopt. 
+  ATTMEN_THREAT ~~ ATTMEN_HEALTH
+
+  # structural relationships
+  ATTENVP ~ ATTMEN_HEALTH + ATTMEN_THREAT
+  ATTENVU ~ ATTMEN_HEALTH + ATTMEN_THREAT 
+  
+  ATTBC_HUM ~ ATTENVP + ATTENVU + ATTMEN_HEALTH + ATTMEN_THREAT
+  ATTBC_EGO ~ ATTENVP + ATTENVU + ATTMEN_HEALTH + ATTMEN_THREAT
+
+  ATTBE_HUM ~ ATTENVP + ATTENVU + ATTMEN_HEALTH + ATTMEN_THREAT
+  ATTBE_EGO ~ ATTENVP + ATTENVU + ATTMEN_HEALTH + ATTMEN_THREAT
+'
+
+
+
+fit_sem_4 <- sem(sem_4, data=data_complete, std.lv=TRUE)
+
+summary(fit_sem_4, standardized=TRUE, fit.measures=TRUE)
+
+graph_sem(
+  model = fit_sem_4,
+  latents = FALSE,          # show only latent variables
+  manifests = FALSE,       # hide indicators
+  load = FALSE,            # hide measurement arrows
+  regress = TRUE,          # keep regressions among latents
+  covs = TRUE              # keep latent covariances if needed
+)
+
+tab <- parameterEstimates(fit_sem_4, standardized = TRUE)
+struct_tab <- tab[tab$op == "~", ]
+struct_tab2 <- struct_tab[, c("lhs","rhs","std.all","se","pvalue")]
+names(struct_tab2) <- c("Outcome","Predictor","Beta","SE","p")
+struct_tab2[, c("Beta","SE","p")] <- round(struct_tab2[, c("Beta","SE","p")], 4)
+
+print(xtable(struct_tab2), type = "latex")
+
+
+# comparison table
+comp_fit_sem<- rbind(
+  Model_1 = fitMeasures(fit_sem_1, c("chisq.scaled","cfi.robust","tli.robust","rmsea.robust","srmr")),
+  Model_2 = fitMeasures(fit_sem_2, c("chisq.scaled","cfi.robust","tli.robust","rmsea.robust","srmr")),
+  Model_3 = fitMeasures(fit_sem_3, c("chisq.scaled","cfi.robust","tli.robust","rmsea.robust","srmr")),
+  Model_4 = fitMeasures(fit_sem_4, c("chisq.scaled","cfi.robust","tli.robust","rmsea.robust","srmr"))
+  ) 
+
+# latex table
+comp_fit_sem <- round(comp_fit_sem, 3)
+
+kable(comp_fit_sem, format = "latex", booktabs = TRUE,
+      caption = "Model fit comparison for SEM",
+      align = "c") %>%
+  kable_styling(latex_options = c("hold_position", "scale_down"))
+
